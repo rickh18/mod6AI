@@ -14,10 +14,9 @@ public class Tokenizer {
      * @return a collection with separate words.
      */
     public static Collection<String> tokenize(String in) {
-        Collection<String> out = new ArrayList<>();
-        out.addAll(Arrays.asList(in.split("\\s")));
+        Collection<String> out;
 
-        out = out.stream()
+        out = Arrays.asList(in.split("\\s")).stream()
                 .map(String::toLowerCase)
                 .map(Tokenizer::removeAllNoneAlphanumeric)
                 .filter(s -> !s.isEmpty())
