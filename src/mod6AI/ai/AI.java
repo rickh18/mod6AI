@@ -1,17 +1,21 @@
 package mod6AI.ai;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Student on 24-11-2014.
  */
 public class AI {
 
+    /**
+     * A map containing for each {@code ClassificationType} a map containing for each word the frequency.
+     */
     private HashMap<ClassificationType, HashMap<String, Integer>> wordFreqPerType;
+    private HashMap<ClassificationType, Integer> totalNumberOfWordsByType;
+    /** The smoothing factor k. */
     private int k;
+    /** The size of the total vocabulary. */
+    private int vocabularySize;
 
     /**
      * Initializes a new AI with given smoothing value.
@@ -19,18 +23,41 @@ public class AI {
      */
     public AI(int k) {
         this.k = k;
+        vocabularySize = 0;
         wordFreqPerType = new HashMap<>();
         wordFreqPerType.put(ClassificationType.MALE, new HashMap<>());
         wordFreqPerType.put(ClassificationType.FEMALE, new HashMap<>());
+        totalNumberOfWordsByType = new HashMap<>();
+        totalNumberOfWordsByType.put(ClassificationType.MALE, 0);
+        totalNumberOfWordsByType.put(ClassificationType.FEMALE, 0);
     }
 
     /**
-     * (Re)trains the AI for the given type with the given String.
+     * Gets the size of the total vocabulary.
+     * @return the size of the total vocabulary.
+     */
+    public int getVocabularySize() {
+        return vocabularySize;
+    }
+
+    /**
+     * Gets the total number of words in all documents written by the given type
+     * @param type the {@code ClassificationType}
+     * @return the total number of words in all documents written by the given type.
+     */
+    public int getTotalNumberOfWordsByType(ClassificationType type) {
+        return totalNumberOfWordsByType.get(type);
+    }
+
+    /**
+     * Trains the AI for the given type with the given String.
      * @param in a String to train with.
      * @param type the ClassificationType of the training String.
      */
-    public void train(String in, ClassificationType type) {
+    public synchronized void train(String in, ClassificationType type) {
         Collection<String> tokens = Tokenizer.tokenize(in);
+
+        totalNumberOfWordsByType.put(type, totalNumberOfWordsByType.get(type) + tokens.size());
 
         Map<String, Integer> wordFreq = getOccurrencesCount(tokens);
         for (String word : wordFreq.keySet()) {
@@ -40,17 +67,11 @@ public class AI {
             }
             wordFreqPerType.get(type).put(word, currentFreq + wordFreq.get(word));
         }
-    }
 
-    private int getVocabularySize() {
         HashSet<String> vocabulary = new HashSet<>();
         vocabulary.addAll(wordFreqPerType.get(ClassificationType.MALE).keySet());
         vocabulary.addAll(wordFreqPerType.get(ClassificationType.FEMALE).keySet());
-        return vocabulary.size();
-    }
-
-    private int getVocabularySizeOfType(ClassificationType type) {
-        return wordFreqPerType.get(type).keySet().size();
+        vocabularySize = vocabulary.size();
     }
 
     /**
@@ -58,18 +79,26 @@ public class AI {
      * @param in a String to classify.
      * @return {@code ClassificationType.MALE} or {@code ClassificationType.FEMALE}.
      */
-    public ClassificationType classify(String in) {
+    public synchronized ClassificationType classify(String in) {
         Collection<String> tokens = Tokenizer.tokenize(in);
-        double chanceM = chanceForType(tokens, ClassificationType.MALE);
-        double chanceF = chanceForType(tokens, ClassificationType.FEMALE);
+
+        double chanceM = calculateChanceForType(tokens, ClassificationType.MALE);
+        double chanceF = calculateChanceForType(tokens, ClassificationType.FEMALE);
 
         return chanceM > chanceF ? ClassificationType.MALE : ClassificationType.FEMALE;
     }
 
-    private double chanceForType(Collection<String> tokens, ClassificationType type) {
-        double chance = tokens.stream().mapToDouble(t -> getChance(t, type)).map(Math::log).sum();
+    /**
+     * Calculate the change that the given token collection is a certain type.
+     * Calculation is done in ln space.
+     * @param tokens the token collection to test.
+     * @param type the type to test for.
+     * @return
+     */
+    private double calculateChanceForType(Collection<String> tokens, ClassificationType type) {
+        double chance = tokens.parallelStream().mapToDouble(t -> getChance(t, type)).map(Math::log).sum();
 
-        return Math.pow(Math.E, chance);
+        return Math.exp(chance);
     }
 
     /**
@@ -84,7 +113,7 @@ public class AI {
             wordFreq = 0;
         }
 
-        return (wordFreq + k) / (getVocabularySizeOfType(type) + k * getVocabularySize());
+        return (wordFreq + k) / (getTotalNumberOfWordsByType(type) + k * getVocabularySize());
     }
 
     /**
