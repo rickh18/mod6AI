@@ -9,16 +9,28 @@ import java.util.Map;
  * Created by Student on 24-11-2014.
  */
 public class AI {
-    HashMap<String, Double> wordChangeGivenMale;
+
+    HashMap<ClassificationType, HashMap<String, Double>> wordChangeGivenType;
 
     public AI() {
-        wordChangeGivenMale = new HashMap<>();
+        wordChangeGivenType = new HashMap<>();
+        wordChangeGivenType.put(ClassificationType.MALE, new HashMap<>());
+        wordChangeGivenType.put(ClassificationType.FEMALE, new HashMap<>());
     }
 
-    public void train(String in) {
+    /**
+     * (Re)trains the AI for the given type with the given String.
+     * @param in a String to train with.
+     * @param type the ClassificationType of the training String.
+     */
+    public void train(String in, ClassificationType type) {
         Collection<String> tokens = Tokenizer.tokenize(in);
-        long count = tokens.stream().count();
-        // TODO: ...
+        double count = tokens.stream().count();
+        Map<String, Integer> wordFreq = getOccurrencesCount(tokens);
+        for (String word : wordFreq.keySet()) {
+            Double chance = wordFreq.get(word) / count;
+            wordChangeGivenType.get(type).put(word, chance);
+        }
     }
 
     /**
@@ -26,7 +38,7 @@ public class AI {
      * @param words a collection of words.
      * @return a HashMap containing for each word the times it occurs.
      */
-    public static Map<String, Integer> getOccurenceCount(Collection<String> words) {
+    public static Map<String, Integer> getOccurrencesCount(Collection<String> words) {
         HashMap<String, Integer> out = new HashMap<>();
         HashSet<String> uniqueWords = new HashSet<>();
 
