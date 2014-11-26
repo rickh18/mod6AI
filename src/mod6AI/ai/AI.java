@@ -93,7 +93,7 @@ public class AI {
      * Calculation is done in ln space.
      * @param tokens the token collection to test.
      * @param type the type to test for.
-     * @return
+     * @return the change that the given token collection indicates the given type.
      */
     private double calculateChanceForType(Collection<String> tokens, ClassificationType type) {
         double chance = tokens.parallelStream().mapToDouble(t -> getChance(t, type)).map(Math::log).sum();
@@ -113,7 +113,7 @@ public class AI {
             wordFreq = 0;
         }
 
-        return (wordFreq + k) / (getTotalNumberOfWordsByType(type) + k * getVocabularySize());
+        return (wordFreq + k) / (double) (getTotalNumberOfWordsByType(type) + k * getVocabularySize());
     }
 
     /**

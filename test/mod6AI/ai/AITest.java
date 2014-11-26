@@ -13,6 +13,8 @@ public class AITest {
     private static final String TEST1 = "test";
     private static final String MALE = "Male";
     private static final String FEMALE = "Female";
+    private static final String MALE_TEST = "Testing. 1, 2, 3. Male test. This is a test.";
+    private static final String FEMALE_TEST = "Testing. 1, 2, 3. Female test. This is a test.";
 
     @Before
     public void setUp() throws Exception {
@@ -40,6 +42,8 @@ public class AITest {
         aiWithK1.train(FEMALE, ClassificationType.FEMALE);
         assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE));
         assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE));
+        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE_TEST));
+        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE_TEST));
     }
 
     @Test
