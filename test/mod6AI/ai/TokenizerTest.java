@@ -3,6 +3,7 @@ package mod6AI.ai;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.junit.Assert.*;
 
@@ -10,7 +11,7 @@ public class TokenizerTest {
 
     @Test
     public void testTokenize() throws Exception {
-        ArrayList<String> tokens = (ArrayList<String>) Tokenizer.tokenize("I don't like Java.\nHowever Java 8 has some pretty nice features. :)");
+        Collection<String> tokens = Tokenizer.tokenize("I don't like Java.\nHowever Java 8 has some pretty nice features. :)");
         ArrayList<String> expected = new ArrayList<>();
         expected.add("i"); expected.add(Tokenizer.removeAllNoneAlphanumeric("don't")); expected.add("like"); expected.add("java");
         expected.add("however"); expected.add("java"); expected.add("8"); expected.add("has"); expected.add("some");
