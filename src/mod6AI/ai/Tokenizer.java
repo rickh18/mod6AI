@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 /**
  * Created by Student on 24-11-2014.
  */
-public class Tokenizer {
+public abstract class Tokenizer {
 
     /**
      * Splits the input String in separate words, cast them to lower and strips all non alphanumerical characters.
