@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * Created by Student on 26-11-2014.
  */
-public class FileMerger {
+public abstract class FileMerger {
 
     public static String merge(String path) {
         File dir = new File(path);
