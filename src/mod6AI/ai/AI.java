@@ -1,6 +1,7 @@
 package mod6AI.ai;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Student on 24-11-2014.
@@ -10,7 +11,7 @@ public class AI {
     /**
      * A map containing for each {@code ClassificationType} a map containing for each word the frequency.
      */
-    private HashMap<ClassificationType, HashMap<String, Integer>> wordFreqPerType;
+    private HashMap<ClassificationType, HashMap<String, Long>> wordFreqPerType;
     private HashMap<ClassificationType, Integer> totalNumberOfWordsByType;
     /** The smoothing factor k. */
     private int k;
@@ -59,11 +60,11 @@ public class AI {
 
         totalNumberOfWordsByType.put(type, totalNumberOfWordsByType.get(type) + tokens.size());
 
-        Map<String, Integer> wordFreq = getOccurrencesCount(tokens);
+        Map<String, Long> wordFreq = getOccurrencesCount(tokens);
         for (String word : wordFreq.keySet()) {
-            Integer currentFreq = wordFreqPerType.get(type).get(word);
+            Long currentFreq = wordFreqPerType.get(type).get(word);
             if (currentFreq == null) {
-                currentFreq = 0;
+                currentFreq = 0L;
             }
             wordFreqPerType.get(type).put(word, currentFreq + wordFreq.get(word));
         }
@@ -108,9 +109,9 @@ public class AI {
      * @return the chance that the given word indicates the given type.
      */
     private double getChance(String word, ClassificationType type) {
-        Integer wordFreq = wordFreqPerType.get(type).get(word);
+        Long wordFreq = wordFreqPerType.get(type).get(word);
         if (wordFreq == null) {
-            wordFreq = 0;
+            wordFreq = 0L;
         }
 
         return (wordFreq + k) / (double) (getTotalNumberOfWordsByType(type) + k * getVocabularySize());
@@ -121,22 +122,7 @@ public class AI {
      * @param words a collection of words.
      * @return a HashMap containing for each word the times it occurs.
      */
-    public static Map<String, Integer> getOccurrencesCount(Collection<String> words) {
-        HashMap<String, Integer> out = new HashMap<>();
-        HashSet<String> uniqueWords = new HashSet<>();
-
-        uniqueWords.addAll(words);
-
-        for (String uWord : uniqueWords) {
-            int count = 0;
-            for (String word : words) {
-                if (word.equals(uWord)) {
-                    count++;
-                }
-            }
-            out.put(uWord, count);
-        }
-
-        return out;
+    public static Map<String, Long> getOccurrencesCount(Collection<String> words) {
+        return words.parallelStream().collect(Collectors.groupingBy(o -> o, Collectors.counting()));
     }
 }
