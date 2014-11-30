@@ -1,0 +1,2 @@
+This test file contains two lines of text.
+And also ends with a LF.
