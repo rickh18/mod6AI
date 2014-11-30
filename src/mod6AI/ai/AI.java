@@ -61,12 +61,9 @@ public class AI {
         totalNumberOfWordsByType.put(type, totalNumberOfWordsByType.get(type) + tokens.size());
 
         Map<String, Long> wordFreq = getOccurrencesCount(tokens);
+        Map<String, Long>  wordFreqCurType = wordFreqPerType.get(type);
         for (String word : wordFreq.keySet()) {
-            Long currentFreq = wordFreqPerType.get(type).get(word);
-            if (currentFreq == null) {
-                currentFreq = 0L;
-            }
-            wordFreqPerType.get(type).put(word, currentFreq + wordFreq.get(word));
+            wordFreqCurType.put(word, wordFreqCurType.getOrDefault(word, 0L) + wordFreq.get(word));
         }
 
         HashSet<String> vocabulary = new HashSet<>();
