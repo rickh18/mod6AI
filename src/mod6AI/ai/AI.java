@@ -62,9 +62,7 @@ public class AI {
 
         Map<String, Long> wordFreq = getOccurrencesCount(tokens);
         Map<String, Long>  wordFreqCurType = wordFreqPerType.get(type);
-        for (String word : wordFreq.keySet()) {
-            wordFreqCurType.put(word, wordFreqCurType.getOrDefault(word, 0L) + wordFreq.get(word));
-        }
+        wordFreq.forEach((word, count) ->  wordFreqCurType.put(word, wordFreqCurType.getOrDefault(word, 0L) +count));
 
         HashSet<String> vocabulary = new HashSet<>();
         vocabulary.addAll(wordFreqPerType.get(ClassificationType.MALE).keySet());
