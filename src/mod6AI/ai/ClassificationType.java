@@ -5,5 +5,10 @@ package mod6AI.ai;
  */
 public enum ClassificationType {
     MALE,
-    FEMALE
+    FEMALE;
+
+    @Override
+    public String toString() {
+        return name().substring(0, 1);
+    }
 }
