@@ -44,6 +44,14 @@ public class AITest {
         assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE));
         assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE_TEST));
         assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE_TEST));
+
+        aiWithK1.setThreshold(2);
+        aiWithK1.train(MALE_TEST, ClassificationType.MALE);
+        aiWithK1.train(FEMALE_TEST, ClassificationType.FEMALE);
+        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE));
+        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE));
+        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE_TEST));
+        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE_TEST));
     }
 
     @Test
