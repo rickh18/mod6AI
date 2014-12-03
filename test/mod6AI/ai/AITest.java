@@ -72,4 +72,13 @@ public class AITest {
         assertEquals(1, occurrences.get("features").longValue());
         assertEquals(11, occurrences.size());
     }
+
+    @Test
+    public void testCanCreateArffDataFile() throws Exception {
+        assertFalse(aiWithK1.canCreateArffDataFile());
+        AI ai2 = new AI(1,1, true);
+        AI ai3 = new AI(1,1, false);
+        assertTrue(ai2.canCreateArffDataFile());
+        assertFalse(ai3.canCreateArffDataFile());
+    }
 }
