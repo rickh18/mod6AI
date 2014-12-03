@@ -1,6 +1,11 @@
 package mod6AI.ai;
 
+import mod6AI.exceptions.UnsupportedTypeException;
+
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Student on 24-11-2014.
@@ -8,28 +13,112 @@ import java.util.*;
 public class AI {
 
     /**
-     * A map containing for each {@code ClassificationType} a map containing for each word the frequency.
+     * For each word count the times it occurs.
+     * @param words a collection of words.
+     * @return a HashMap containing for each word the times it occurs.
      */
-    private HashMap<ClassificationType, HashMap<String, Integer>> wordFreqPerType;
-    private HashMap<ClassificationType, Integer> totalNumberOfWordsByType;
+    public static Map<String, Long> getOccurrencesCount(Collection<String> words) {
+        return words.parallelStream().collect(Collectors.groupingBy(o -> o, Collectors.counting()));
+    }
+
+
+    /**
+     * Represent a classified data set.
+     * It contains the {@code ClassificationType} of the data set and for each word/attribute the number of occurrences.
+     */
+    private class ClassifiedDataSet {
+        private final Map<String, Long> data;
+        private final ClassificationType type;
+
+        /**
+         * Initializes a new {@code ClassifiedDataSet} with the given data and {@code ClassificationType}.
+         * @param data the data.
+         * @param type the type of the data set.
+         */
+        public ClassifiedDataSet(Map<String, Long> data, ClassificationType type) {
+            this.data = data;
+            this.type = type;
+        }
+
+        /**
+         * Gets the data, a map with for each word/attribute the number of occurrences.
+         * @return the data set.
+         */
+        public Map<String, Long> getData() {
+            return data;
+        }
+
+        /**
+         * Gets the {@code ClassificationType} of the data set.
+         * @return the {@code ClassificationType}.
+         */
+        public ClassificationType getType() {
+            return type;
+        }
+    }
+
+
+
     /** The smoothing factor k. */
-    private int k;
-    /** The size of the total vocabulary. */
-    private int vocabularySize;
+    private double k;
+    /** Threshold value which determines if a word is kept in the vocabulary */
+    private int threshold;
+    /** Indicates if this AI can create an arff data file. */
+    private final boolean arff;
+
+    /**
+     * The complete vocabulary of the training sets with for each word the number of occurrences per type.
+     */
+    private HashMap<String, OccurrencesPerType> vocabulary;
+    /**
+     * Cached value of the number of words in the vocabulary that occur at least as often as the threshold.
+     */
+    private long cachedVocabularySizeAboveThreshold;
+    /**
+     * A map containing the total number of words in the training set per {@code ClassificationType}.
+     */
+    private HashMap<ClassificationType, Integer> totalNumberOfWordsByType;
+    /**
+     * Holds all classified data sets with which this AI is trained, when this AI was created with the arff option set.
+     * If the arff option was not set this collection will not be populated.
+     */
+    private ArrayList<ClassifiedDataSet> classifiedDataSets;
 
     /**
      * Initializes a new AI with given smoothing value.
+     * This AI will not be able to create an arff data file.
+     * The threshold for words to be considered being in the vocabulary will be initialized at 0.
      * @param k the smoothing value
      */
-    public AI(int k) {
+    public AI(double k) {
+        this(k, 0, false);
+    }
+
+    /**
+     * Initializes a new AI with given smoothing and threshold value.
+     * This AI will not be able to create an arff data file.
+     * @param k the smoothing value
+     * @param threshold the threshold for words to be considered being in the vocabulary
+     */
+    public AI(double k, int threshold) {
+        this(k, threshold, false);
+    }
+
+    /**
+     * Initializes a new AI with given smoothing and threshold value.
+     * @param k the smoothing value
+     * @param threshold the threshold for words to be considered being in the vocabulary
+     * @param arff when set to true this AI will be able to create an arff data file.
+     */
+    public AI(double k, int threshold, boolean arff) {
         this.k = k;
-        vocabularySize = 0;
-        wordFreqPerType = new HashMap<>();
-        wordFreqPerType.put(ClassificationType.MALE, new HashMap<>());
-        wordFreqPerType.put(ClassificationType.FEMALE, new HashMap<>());
+        this.threshold = threshold;
+        this.arff = arff;
+        vocabulary = new HashMap<>();
         totalNumberOfWordsByType = new HashMap<>();
         totalNumberOfWordsByType.put(ClassificationType.MALE, 0);
         totalNumberOfWordsByType.put(ClassificationType.FEMALE, 0);
+        classifiedDataSets = new ArrayList<>();
     }
 
     /**
@@ -37,7 +126,30 @@ public class AI {
      * @return the size of the total vocabulary.
      */
     public int getVocabularySize() {
-        return vocabularySize;
+        return vocabulary.size();
+    }
+
+    /**
+     * Gets the number of words in the vocabulary that occur at least as often as the threshold.
+     * @return the size of the vocabulary above the threshold.
+     */
+    private long getVocabularySizeAboveThreshold() {
+        return vocabulary.values().parallelStream().filter(o -> o.getTotal() >= getThreshold()).count();
+    }
+
+    /**
+     * Gets the cached value for the number of words in the vocabulary that occur at least as often as the threshold.
+     * @return the size of the vocabulary above the threshold.
+     */
+    public long getCachedVocabularySizeAboveThreshold() {
+        return cachedVocabularySizeAboveThreshold;
+    }
+
+    /**
+     * Updates the cached value for the number of words in the vocabulary that occur at least as often as the threshold.
+     */
+    private void updateCachedVocabularySizeAboveThreshold() {
+        cachedVocabularySizeAboveThreshold = getVocabularySizeAboveThreshold();
     }
 
     /**
@@ -54,24 +166,29 @@ public class AI {
      * @param in a String to train with.
      * @param type the ClassificationType of the training String.
      */
-    public synchronized void train(String in, ClassificationType type) {
+    public synchronized void train(String in, ClassificationType type) throws UnsupportedTypeException {
         Collection<String> tokens = Tokenizer.tokenize(in);
 
         totalNumberOfWordsByType.put(type, totalNumberOfWordsByType.get(type) + tokens.size());
 
-        Map<String, Integer> wordFreq = getOccurrencesCount(tokens);
-        for (String word : wordFreq.keySet()) {
-            Integer currentFreq = wordFreqPerType.get(type).get(word);
-            if (currentFreq == null) {
-                currentFreq = 0;
-            }
-            wordFreqPerType.get(type).put(word, currentFreq + wordFreq.get(word));
+        Map<String, Long> occurrencesCount = getOccurrencesCount(tokens);
+        switch (type) {
+            case MALE:
+                occurrencesCount.forEach((word, count) ->
+                        vocabulary.put(word, vocabulary.getOrDefault(word, new OccurrencesPerType()).addMale(count)));
+                break;
+            case FEMALE:
+                occurrencesCount.forEach((word, count) ->
+                        vocabulary.put(word, vocabulary.getOrDefault(word, new OccurrencesPerType()).addFemale(count)));
+                break;
+            default:
+                throw new UnsupportedTypeException();
+        }
+        if (arff) {
+            classifiedDataSets.add(new ClassifiedDataSet(occurrencesCount, type));
         }
 
-        HashSet<String> vocabulary = new HashSet<>();
-        vocabulary.addAll(wordFreqPerType.get(ClassificationType.MALE).keySet());
-        vocabulary.addAll(wordFreqPerType.get(ClassificationType.FEMALE).keySet());
-        vocabularySize = vocabulary.size();
+        updateCachedVocabularySizeAboveThreshold();
     }
 
     /**
@@ -93,12 +210,12 @@ public class AI {
      * Calculation is done in ln space.
      * @param tokens the token collection to test.
      * @param type the type to test for.
-     * @return the change that the given token collection indicates the given type.
+     * @return the ln(change) that the given token collection indicates the given type.
      */
     private double calculateChanceForType(Collection<String> tokens, ClassificationType type) {
-        double chance = tokens.parallelStream().mapToDouble(t -> getChance(t, type)).map(Math::log).sum();
-
-        return Math.exp(chance);
+        return tokens.parallelStream()
+                        .filter(t -> vocabulary.containsKey(t) && vocabulary.get(t).getTotal() >= getThreshold())
+                        .mapToDouble(t -> getChance(t, type)).map(Math::log).sum();
     }
 
     /**
@@ -108,35 +225,105 @@ public class AI {
      * @return the chance that the given word indicates the given type.
      */
     private double getChance(String word, ClassificationType type) {
-        Integer wordFreq = wordFreqPerType.get(type).get(word);
-        if (wordFreq == null) {
-            wordFreq = 0;
+        long wordFreq = 0;
+        OccurrencesPerType occurrencesPerType = vocabulary.get(word);
+        if (occurrencesPerType != null) {
+            try {
+                wordFreq = vocabulary.get(word).get(type);
+            } catch (UnsupportedTypeException e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
         }
 
-        return (wordFreq + k) / (double) (getTotalNumberOfWordsByType(type) + k * getVocabularySize());
+        return (wordFreq + k) / (getTotalNumberOfWordsByType(type) + k * getCachedVocabularySizeAboveThreshold());
     }
 
     /**
-     * For each word count the times it occurs.
-     * @param words a collection of words.
-     * @return a HashMap containing for each word the times it occurs.
+     * Gets the smoothing factor k..
+     * @return the smoothing factor k.
      */
-    public static Map<String, Integer> getOccurrencesCount(Collection<String> words) {
-        HashMap<String, Integer> out = new HashMap<>();
-        HashSet<String> uniqueWords = new HashSet<>();
+    public double getK() {
+        return k;
+    }
 
-        uniqueWords.addAll(words);
+    /**
+     * Sets the threshold value.
+     * @param k the new smoothing factor k..
+     */
+    public synchronized void setK(double k) {
+        this.k = k;
+    }
 
-        for (String uWord : uniqueWords) {
-            int count = 0;
-            for (String word : words) {
-                if (word.equals(uWord)) {
-                    count++;
-                }
-            }
-            out.put(uWord, count);
+    /**
+     * Gets the number of times a word should at least occur to be considered as being in the vocabulary.
+     * @return the threshold value.
+     */
+    public int getThreshold() {
+        return threshold;
+    }
+
+    /**
+     * Sets the threshold value.
+     * @param threshold the new threshold value.
+     */
+    public synchronized void setThreshold(int threshold) {
+        this.threshold = threshold;
+        updateCachedVocabularySizeAboveThreshold();
+    }
+
+    /**
+     * Indicates if this AI can create an arff data file.
+     * @return {@code true} when this AI was created with the arff option set; otherwise {@code false}.
+     */
+    public boolean canCreateArffDataFile() {
+        return arff;
+    }
+
+    /**
+     * Creates a arff data file and writes it to the given writer.
+     * @param writer the {@code Writer} to write to.
+     * @param name the name of the relation.
+     * @return {@code true} if creation was successful;
+     * otherwise {@code false}, this will be the case when this AI was not created with the arff option set.
+     */
+    public boolean createArffDataFile(Writer writer, String name) {
+        if (!arff || writer == null || name == null) {
+            return false;
         }
 
-        return out;
+        PrintWriter printWriter = new PrintWriter(writer, true);
+
+        List<String> attributes = vocabulary.keySet().parallelStream()
+                                                        .filter(o -> vocabulary.get(o).getTotal() >= getThreshold())
+                                                        .sorted().collect(Collectors.toList());
+
+        printWriter.printf("@RELATION '%s'", name).println();
+        printWriter.println();
+        attributes.forEach(a -> printWriter.printf("@ATTRIBUTE %s NUMERIC", a).println());
+        printWriter.println("@ATTRIBUTE @@class@@ {F,M}");
+        printWriter.println();
+        printWriter.println("@DATA");
+        for (ClassifiedDataSet ds : classifiedDataSets) {
+            StringBuilder buf = new StringBuilder();
+            buf.append("{");
+            for (Map.Entry<String, Long> entry : ds.getData().entrySet().stream()
+                                                                        .sorted((e1, e2) ->
+                                                                                e1.getKey().compareTo(e2.getKey()))
+                                                                        .collect(Collectors.toList())) {
+                buf.append(attributes.indexOf(entry.getKey()));
+                buf.append(" ");
+                buf.append(entry.getValue());
+                buf.append(",");
+            }
+            buf.append(attributes.size());
+            buf.append(" ");
+            buf.append(ds.getType().toString());
+            buf.append("}");
+
+            printWriter.println(buf);
+        }
+
+        return true;
     }
 }

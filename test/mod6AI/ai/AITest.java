@@ -44,24 +44,41 @@ public class AITest {
         assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE));
         assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE_TEST));
         assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE_TEST));
+
+        aiWithK1.setThreshold(2);
+        aiWithK1.train(MALE_TEST, ClassificationType.MALE);
+        aiWithK1.train(FEMALE_TEST, ClassificationType.FEMALE);
+        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE));
+        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE));
+        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE_TEST));
+        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE_TEST));
     }
 
     @Test
     public void testGetOccurrencesCount() throws Exception {
-        Map<String, Integer> occurrences = AI.getOccurrencesCount(
+        Map<String, Long> occurrences = AI.getOccurrencesCount(
                 Tokenizer.tokenize("I don't like Java.\nHowever Java 8 has some pretty nice features. :)"));
 
-        assertEquals(1, (int) occurrences.get("i"));
-        assertEquals(1, (int) occurrences.get(Tokenizer.removeAllNoneAlphanumeric("don't")));
-        assertEquals(1, (int) occurrences.get("like"));
-        assertEquals(2, (int) occurrences.get("java"));
-        assertEquals(1, (int) occurrences.get("however"));
-        assertEquals(1, (int) occurrences.get("8"));
-        assertEquals(1, (int) occurrences.get("has"));
-        assertEquals(1, (int) occurrences.get("some"));
-        assertEquals(1, (int) occurrences.get("pretty"));
-        assertEquals(1, (int) occurrences.get("nice"));
-        assertEquals(1, (int) occurrences.get("features"));
+        assertEquals(1, occurrences.get("i").longValue());
+        assertEquals(1, occurrences.get(Tokenizer.removeAllNoneAlphanumeric("don't")).longValue());
+        assertEquals(1, occurrences.get("like").longValue());
+        assertEquals(2, occurrences.get("java").longValue());
+        assertEquals(1, occurrences.get("however").longValue());
+        assertEquals(1, occurrences.get("8").longValue());
+        assertEquals(1, occurrences.get("has").longValue());
+        assertEquals(1, occurrences.get("some").longValue());
+        assertEquals(1, occurrences.get("pretty").longValue());
+        assertEquals(1, occurrences.get("nice").longValue());
+        assertEquals(1, occurrences.get("features").longValue());
         assertEquals(11, occurrences.size());
+    }
+
+    @Test
+    public void testCanCreateArffDataFile() throws Exception {
+        assertFalse(aiWithK1.canCreateArffDataFile());
+        AI ai2 = new AI(1,1, true);
+        AI ai3 = new AI(1,1, false);
+        assertTrue(ai2.canCreateArffDataFile());
+        assertFalse(ai3.canCreateArffDataFile());
     }
 }

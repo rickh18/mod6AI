@@ -54,7 +54,7 @@ public abstract class FileMerger {
         return files.stream()
                     .filter(File::isFile)
                     .map(FileMerger::readFile)
-                    .reduce("", (a, b) -> a + System.lineSeparator() + b).trim();
+                    .collect(Collectors.joining(System.lineSeparator())).trim();
     }
 
     /**
@@ -71,7 +71,7 @@ public abstract class FileMerger {
 
         String out;
         try(Stream<String> stream = Files.lines(file.toPath())) {
-            out = stream.reduce("", (a, b) -> a + System.lineSeparator() + b).trim();
+            out = stream.collect(Collectors.joining(System.lineSeparator())).trim();
         } catch (IOException e) {
             out = null;
         }
