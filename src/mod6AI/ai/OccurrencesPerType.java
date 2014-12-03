@@ -75,7 +75,7 @@ public class OccurrencesPerType {
      * Adds the given value to the number of occurrences for the given {@code ClassificationType}.
      * @param type the {@code ClassificationType}.
      * @param value the value to add.
-     * @return a reference to this {@code OccurrencesPerType}.
+     * @return this {@code OccurrencesPerType}.
      */
     public OccurrencesPerType add(ClassificationType type, long value) throws UnsupportedTypeException {
         switch (type) {
@@ -111,7 +111,7 @@ public class OccurrencesPerType {
     /**
      * Adds the given value to the number of occurrences for males.
      * @param value the value to add.
-     * @return a reference to this {@code OccurrencesPerType}.
+     * @return this {@code OccurrencesPerType}.
      */
     public OccurrencesPerType addMale(long value) {
         this.male += value;
@@ -137,7 +137,7 @@ public class OccurrencesPerType {
     /**
      * Adds the given value to the number of occurrences for females.
      * @param value the value to add.
-     * @return a reference to this {@code OccurrencesPerType}.
+     * @return this {@code OccurrencesPerType}.
      */
     public OccurrencesPerType addFemale(long value) {
         this.female += value;
