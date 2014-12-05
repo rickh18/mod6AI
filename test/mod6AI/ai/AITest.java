@@ -3,6 +3,8 @@ package mod6AI.ai;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -80,5 +82,10 @@ public class AITest {
         AI ai3 = new AI(1,1, false);
         assertTrue(ai2.canCreateArffDataFile());
         assertFalse(ai3.canCreateArffDataFile());
+
+        ai2.train(TEST1, ClassificationType.MALE);
+        ai2.train(TEST1, ClassificationType.FEMALE);
+
+        ai2.createArffDataFile(new PrintWriter(System.out), "test");
     }
 }
