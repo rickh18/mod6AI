@@ -360,9 +360,10 @@ public class AI {
             StringBuilder buf = new StringBuilder();
             buf.append("{");
             for (Map.Entry<String, Long> entry : ds.getData().entrySet().stream()
-                    .sorted((e1, e2) ->
-                            e1.getKey().compareTo(e2.getKey()))
-                    .collect(Collectors.toList())) {
+                                                                        .filter(e -> attributes.contains(e.getKey()))
+                                                                        .sorted((e1, e2) ->
+                                                                                e1.getKey().compareTo(e2.getKey()))
+                                                                        .collect(Collectors.toList())) {
                 buf.append(attributes.indexOf(entry.getKey()));
                 buf.append(" ");
                 buf.append(entry.getValue());
