@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -53,7 +54,7 @@ public class Simple {
         }
     }
 
-    public static void testArff() throws FileNotFoundException {
+    public static void createArffs() throws FileNotFoundException {
         AI ai = new AI(1, 0, true);
 
         Scanner in = new Scanner(System.in);
@@ -76,20 +77,66 @@ public class Simple {
         }
         long end = System.currentTimeMillis();
         System.out.printf("Done. %d", end - begin);
-
-        in.nextLine();
+        System.out.println();
 
         System.out.print("Were do you want the arff data file: ");
         String arffPath = in.nextLine();
         PrintWriter writer = new PrintWriter(arffPath);
 
-        System.out.println("Creating arff data file...");
+        System.out.println("Creating arff data file from training data set...");
         begin = System.currentTimeMillis();
 
-        ai.createArffDataFile(writer, "blog");
+        ai.createArffDataFile(writer, "blog_train");
 
         end = System.currentTimeMillis();
         System.out.printf("Done. %d", end - begin);
+        System.out.println();
+
+
+        System.out.print("Path directory with male test data: ");
+        String maleTestPath = in.nextLine();
+        System.out.print("Path directory with female test data: ");
+        String femaleTestPath = in.nextLine();
+
+        System.out.println("Reading data...");
+        begin = System.currentTimeMillis();
+
+        ArrayList<AI.DataSet> dataSets = new ArrayList<>();
+        try {
+            FileMerger.listFilesWithExtension(Paths.get(maleTestPath), "txt")
+                            .parallelStream()
+                            .map(FileMerger::readFile)
+                            .map(Tokenizer::tokenize)
+                            .map(AI::getOccurrencesCount)
+                            .map(d -> new AI.ClassifiedDataSet(d, ClassificationType.MALE))
+                            .forEach(dataSets::add);
+            FileMerger.listFilesWithExtension(Paths.get(femaleTestPath), "txt")
+                    .parallelStream()
+                    .map(FileMerger::readFile)
+                    .map(Tokenizer::tokenize)
+                    .map(AI::getOccurrencesCount)
+                    .map(d -> new AI.ClassifiedDataSet(d, ClassificationType.FEMALE))
+                    .forEach(dataSets::add);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        end = System.currentTimeMillis();
+        System.out.printf("Done. %d", end - begin);
+        System.out.println();
+
+        System.out.print("Were do you want the arff data file: ");
+        arffPath = in.nextLine();
+        writer = new PrintWriter(arffPath);
+
+        System.out.println("Creating arff data file from training data set...");
+        begin = System.currentTimeMillis();
+
+        ai.createArffDataFile(dataSets, writer, "blog_test");
+
+        end = System.currentTimeMillis();
+        System.out.printf("Done. %d", end - begin);
+        System.out.println();
     }
 
     public static AI trainedAI(int k, int threshold) {
@@ -156,16 +203,16 @@ public class Simple {
     }
 
     public static void main(String[] args) {
-//        try {
-//            testArff();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
         try {
-            testPerformance();
-        } catch (IOException e) {
+            createArffs();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+//        try {
+//            testPerformance();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
 }

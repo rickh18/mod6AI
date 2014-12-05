@@ -21,23 +21,19 @@ public class AI {
         return words.parallelStream().collect(Collectors.groupingBy(o -> o, Collectors.counting()));
     }
 
-
     /**
-     * Represent a classified data set.
-     * It contains the {@code ClassificationType} of the data set and for each word/attribute the number of occurrences.
+     * Represent a data set.
+     * It contains for each word/attribute the number of occurrences.
      */
-    private class ClassifiedDataSet {
+    public static class DataSet {
         private final Map<String, Long> data;
-        private final ClassificationType type;
 
         /**
-         * Initializes a new {@code ClassifiedDataSet} with the given data and {@code ClassificationType}.
+         * Initializes a new {@code DataSet} with the given data.
          * @param data the data.
-         * @param type the type of the data set.
          */
-        public ClassifiedDataSet(Map<String, Long> data, ClassificationType type) {
+        public DataSet(Map<String, Long> data) {
             this.data = data;
-            this.type = type;
         }
 
         /**
@@ -46,6 +42,24 @@ public class AI {
          */
         public Map<String, Long> getData() {
             return data;
+        }
+    }
+
+    /**
+     * Represent a classified data set.
+     * It contains the {@code ClassificationType} of the data set and for each word/attribute the number of occurrences.
+     */
+    public static class ClassifiedDataSet extends DataSet {
+        private final ClassificationType type;
+
+        /**
+         * Initializes a new {@code ClassifiedDataSet} with the given data and {@code ClassificationType}.
+         * @param data the data.
+         * @param type the type of the data set.
+         */
+        public ClassifiedDataSet(Map<String, Long> data, ClassificationType type) {
+            super(data);
+            this.type = type;
         }
 
         /**
@@ -82,7 +96,7 @@ public class AI {
      * Holds all classified data sets with which this AI is trained, when this AI was created with the arff option set.
      * If the arff option was not set this collection will not be populated.
      */
-    private ArrayList<ClassifiedDataSet> classifiedDataSets;
+    private ArrayList<DataSet> classifiedDataSets;
 
     /**
      * Initializes a new AI with given smoothing value.
@@ -108,7 +122,7 @@ public class AI {
      * Initializes a new AI with given smoothing and threshold value.
      * @param k the smoothing value
      * @param threshold the threshold for words to be considered being in the vocabulary
-     * @param arff when set to true this AI will be able to create an arff data file.
+     * @param arff when set to true this AI will be able to create an arff data file from the date it is trained with.
      */
     public AI(double k, int threshold, boolean arff) {
         this.k = k;
@@ -273,7 +287,7 @@ public class AI {
     }
 
     /**
-     * Indicates if this AI can create an arff data file.
+     * Indicates if this AI can create an arff data file from the data it was trained with.
      * @return {@code true} when this AI was created with the arff option set; otherwise {@code false}.
      */
     public boolean canCreateArffDataFile() {
@@ -281,22 +295,60 @@ public class AI {
     }
 
     /**
-     * Creates a arff data file and writes it to the given writer.
+     * Creates a arff data file from the training sets and writes it to the given writer.
      * @param writer the {@code Writer} to write to.
      * @param name the name of the relation.
      * @return {@code true} if creation was successful;
      * otherwise {@code false}, this will be the case when this AI was not created with the arff option set.
      */
     public boolean createArffDataFile(Writer writer, String name) {
-        if (!arff || writer == null || name == null) {
+        if (!arff) {
+            return false;
+        }
+
+        return createArffDataFile(classifiedDataSets, writer, name);
+    }
+
+    /**
+     * Creates a arff data file with the current vocabulary and the given unclassified data
+     * and writes it to the given writer.
+     * @param data the unclassified data.
+     * @param writer the {@code Writer} to write to.
+     * @param name the name of the relation.
+     * @return {@code true} if creation was successful; otherwise {@code false}.
+     */
+    public boolean createArffDataFileFromOtherDataSet(Collection<String> data, Writer writer, String name) {
+        if (writer == null || name == null) {
+            return false;
+        }
+
+        ArrayList<DataSet> dataSets = new ArrayList<>();
+        data.parallelStream()
+                .map(Tokenizer::tokenize)
+                .map(AI::getOccurrencesCount)
+                .map(DataSet::new)
+                .forEach(dataSets::add);
+
+        return createArffDataFile(dataSets, writer, name);
+    }
+
+    /**
+     * Creates a arff data file with the current vocabulary and the given data and writes it to the given writer.
+     * @param data the data, a list with unclassified {@code DataSet} and/or classified {@code ClassifiedDataSet}.
+     * @param writer the {@code Writer} to write to.
+     * @param name the name of the relation.
+     * @return {@code true} if creation was successful; otherwise {@code false}.
+     */
+    public boolean createArffDataFile(ArrayList<DataSet> data, Writer writer, String name) {
+        if (writer == null || name == null) {
             return false;
         }
 
         PrintWriter printWriter = new PrintWriter(writer, true);
 
         List<String> attributes = vocabulary.keySet().parallelStream()
-                                                        .filter(o -> vocabulary.get(o).getTotal() >= getThreshold())
-                                                        .sorted().collect(Collectors.toList());
+                .filter(o -> vocabulary.get(o).getTotal() >= getThreshold())
+                .sorted().collect(Collectors.toList());
 
         printWriter.printf("@RELATION '%s'", name).println();
         printWriter.println();
@@ -304,21 +356,25 @@ public class AI {
         printWriter.println("@ATTRIBUTE @@class@@ {F,M}");
         printWriter.println();
         printWriter.println("@DATA");
-        for (ClassifiedDataSet ds : classifiedDataSets) {
+        for (DataSet ds : data) {
             StringBuilder buf = new StringBuilder();
             buf.append("{");
             for (Map.Entry<String, Long> entry : ds.getData().entrySet().stream()
-                                                                        .sorted((e1, e2) ->
-                                                                                e1.getKey().compareTo(e2.getKey()))
-                                                                        .collect(Collectors.toList())) {
+                    .sorted((e1, e2) ->
+                            e1.getKey().compareTo(e2.getKey()))
+                    .collect(Collectors.toList())) {
                 buf.append(attributes.indexOf(entry.getKey()));
                 buf.append(" ");
                 buf.append(entry.getValue());
                 buf.append(",");
             }
-            buf.append(attributes.size());
-            buf.append(" ");
-            buf.append(ds.getType().toString());
+            if (ds instanceof ClassifiedDataSet) {
+                buf.append(attributes.size());
+                buf.append(" ");
+                buf.append(((ClassifiedDataSet) ds).getType().toString());
+            } else {
+                buf.deleteCharAt(buf.length() -1);
+            }
             buf.append("}");
 
             printWriter.println(buf);
