@@ -16,7 +16,7 @@ public abstract class Tokenizer {
     public static Collection<String> tokenize(String in) {
         Collection<String> out;
 
-        out = Arrays.asList(in.split("\\s")).stream()
+        out = Arrays.asList(in.split("[\\s\\.,;:\"()?!@#$%^&*()-]")).stream()
                 .map(String::toLowerCase)
                 .map(Tokenizer::removeAllNoneAlphanumeric)
                 .filter(s -> !s.isEmpty())
