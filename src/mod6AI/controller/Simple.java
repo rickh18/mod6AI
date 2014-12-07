@@ -191,13 +191,11 @@ public class Simple {
                         .map(ai::classify)
                         .collect(Collectors.groupingBy(o -> o, Collectors.counting()));
 
-                System.out.println("  M    F   <-- classified as");
-                System.out.printf("%4d   %4d  | M%s", classifiedMaleTestData.get(ClassificationType.MALE),
-                        classifiedMaleTestData.get(ClassificationType.FEMALE),
-                        System.lineSeparator());
-                System.out.printf("%4d   %4d  | F%s", classifiedFemaleTestData.get(ClassificationType.MALE),
-                        classifiedFemaleTestData.get(ClassificationType.FEMALE),
-                        System.lineSeparator());
+                System.out.println("   M    F <-- classified as");
+                System.out.println(String.format("%4d %4d | M", classifiedMaleTestData.get(ClassificationType.MALE),
+                        classifiedMaleTestData.get(ClassificationType.FEMALE)));
+                System.out.println(String.format("%4d %4d | M", classifiedFemaleTestData.get(ClassificationType.MALE),
+                        classifiedFemaleTestData.get(ClassificationType.FEMALE)));
             }
         }
     }
