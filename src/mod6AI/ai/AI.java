@@ -377,9 +377,7 @@ public class AI {
     }
 
     public boolean load(String file) throws FileNotFoundException {
-        try {
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-
+        try(ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             Object object = in.readObject();
             vocabulary = (HashMap<String, OccurrencesPerType>) object;
         } catch (ClassNotFoundException | IOException e) {
