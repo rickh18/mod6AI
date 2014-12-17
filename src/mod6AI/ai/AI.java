@@ -229,6 +229,10 @@ public class AI {
      * @return the chance that the given word indicates the given type.
      */
     private double getChance(String word, ClassificationType type) {
+        if (getTotalNumberOfWordsByType(type) == 0) {
+            return 0;
+        }
+
         long wordFreq = 0;
         OccurrencesPerType occurrencesPerType = vocabulary.get(word);
         if (occurrencesPerType != null) {
