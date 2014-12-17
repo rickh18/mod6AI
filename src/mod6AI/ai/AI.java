@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * A Naive Bayesian Classifier.
  * Created by Student on 24-11-2014.
  */
 public class AI {
@@ -370,14 +371,27 @@ public class AI {
         return true;
     }
 
-    public void save(String file) throws IOException {
+    /**
+     * Saves the AI to the specified file. The k and threshold values are not saved.
+     * @param file the filename/-path to save to.
+     * @throws IOException when the file could not be created or any other IO exception occurs while saving.
+     */
+    public synchronized void save(String file) throws IOException {
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
         out.writeObject(vocabulary);
         out.close();
     }
 
+    /**
+     * Loads a saved AI into this one.
+     * If this AI was already trained with some data, this will be lost.
+     * The k and threshold values of this AI remain unchanged.
+     * @param file the filename/-path to load.
+     * @return {@code true} if everything was successful; otherwise {@code false}.
+     * @throws FileNotFoundException when the specified file was not found.
+     */
     @SuppressWarnings("unchecked")
-    public boolean load(String file) throws FileNotFoundException {
+    public synchronized boolean load(String file) throws FileNotFoundException {
         try(ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             Object object = in.readObject();
             vocabulary = (HashMap<String, OccurrencesPerType>) object;
