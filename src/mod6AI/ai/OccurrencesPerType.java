@@ -1,9 +1,11 @@
 package mod6AI.ai;
 
+import java.io.Serializable;
+
 /**
 * Created by Student on 30-11-2014.
 */
-public class OccurrencesPerType {
+public class OccurrencesPerType implements Serializable {
 
     /** The number of occurrences for {@code ClassificationType.C1}. */
     private long c1;
