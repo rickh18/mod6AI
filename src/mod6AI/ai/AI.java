@@ -1,7 +1,6 @@
 package mod6AI.ai;
 
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -368,6 +367,33 @@ public class AI {
             printWriter.println(buf);
         }
 
+        return true;
+    }
+
+    public void save(String file) throws IOException {
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+        out.writeObject(vocabulary);
+        out.close();
+    }
+
+    public boolean load(String file) throws FileNotFoundException {
+        try {
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+
+            Object object = in.readObject();
+            vocabulary = (HashMap<String, OccurrencesPerType>) object;
+        } catch (ClassNotFoundException | IOException e) {
+            return false;
+        }
+
+        vocabulary.values().forEach(o -> {
+            totalNumberOfWordsByType.put(ClassificationType.C1,
+                    totalNumberOfWordsByType.get(ClassificationType.C1) + o.getC1());
+            totalNumberOfWordsByType.put(ClassificationType.C2,
+                    totalNumberOfWordsByType.get(ClassificationType.C2) + o.getC2());
+        });
+
+        updateCachedVocabularySizeAboveThreshold();
         return true;
     }
 }
