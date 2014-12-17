@@ -29,6 +29,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import mod6AI.ai.AI;
+import mod6AI.ai.ClassificationType;
 
 public class View extends JFrame implements Observer {
 
@@ -46,9 +47,12 @@ public class View extends JFrame implements Observer {
 	private AI ai;
 
 	public static void main(String[] args) {
+		ClassificationType.C1.setName("Male");
+		ClassificationType.C2.setName("Female");
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				AI ai = new AI(10);
+				new ListItem(null, ClassificationType.C1, null);
+				AI ai = new AI(1);
 				new View(ai);
 			}
 		});
@@ -101,6 +105,7 @@ public class View extends JFrame implements Observer {
 		c.gridx = 1;
 		c.weightx = 1;
 		button = new JButton("Send");
+		button.setBackground(bgColor);
 		button.setFont(new Font("Serif", Font.BOLD, 30));
 		panel.add(button, c);
 
@@ -243,13 +248,20 @@ public class View extends JFrame implements Observer {
 	 */
 	public static ImageIcon scaleImage(String resource, int width, int height) {
 		ImageIcon imageIcon = new ImageIcon(resource);
-
+		ImageIcon img;
+		long begin = System.currentTimeMillis();
+		
 		if (width == 0 || height == 0) {
-			return imageIcon;
+			img = imageIcon;
 		} else {
-			return new ImageIcon(imageIcon.getImage().getScaledInstance(width,
+			
+			img = new ImageIcon(imageIcon.getImage().getScaledInstance(width,
 					height, java.awt.Image.SCALE_SMOOTH));
 		}
+		long time = begin - System.currentTimeMillis();
+		System.out.println("timing: " + resource + time);
+		
+		return img;
 	}
 
 }

@@ -9,13 +9,14 @@ import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import mod6AI.ai.ClassificationType;
 import mod6AI.gui.View.MouseController;
 
 //import mod6AI.gui.View.ListItem;
 
-public class ListItem extends JLabel {
+public class ListItem extends JPanel {
 	/**
 	 * 
 	 */
@@ -52,6 +53,8 @@ public class ListItem extends JLabel {
 		this.text = text;
 
 		this.setLayout(new GridBagLayout());
+		this.setBackground(Color.WHITE);
+		this.setOpaque(true);
 		this.drawLayout();
 		this.addController(controller);
 
@@ -64,12 +67,10 @@ public class ListItem extends JLabel {
 		return this;
 	}
 
-	@Override
 	public String getText() {
 		return text;
 	}
-
-	@Override
+	
 	public void setText(String text) {
 		this.text = text;
 	}
