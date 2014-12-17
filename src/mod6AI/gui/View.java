@@ -146,7 +146,7 @@ public class View extends JFrame implements Observer {
 	private void addItem(String text, ClassificationType type) {
 		ImageIcon image;
 
-		if (type.equals(ClassificationType.MALE))
+		if (type.equals(ClassificationType.C1))
 			image = imgMale;
 		else
 			image = imgFemale;

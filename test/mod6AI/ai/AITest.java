@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Map;
 
 import static org.junit.Assert.*;
@@ -26,34 +25,34 @@ public class AITest {
     @Test
     public void testGetVocabularySizeAndGetTotalNumberOfWordsByType() throws Exception {
         assertEquals(0, aiWithK1.getVocabularySize());
-        assertEquals(0, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.MALE));
-        assertEquals(0, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.FEMALE));
-        aiWithK1.train(TEST1, ClassificationType.MALE);
+        assertEquals(0, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.C1));
+        assertEquals(0, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.C2));
+        aiWithK1.train(TEST1, ClassificationType.C1);
         assertEquals(1, aiWithK1.getVocabularySize());
-        assertEquals(1, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.MALE));
-        assertEquals(0, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.FEMALE));
-        aiWithK1.train(TEST1, ClassificationType.FEMALE);
+        assertEquals(1, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.C1));
+        assertEquals(0, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.C2));
+        aiWithK1.train(TEST1, ClassificationType.C2);
         assertEquals(1, aiWithK1.getVocabularySize());
-        assertEquals(1, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.MALE));
-        assertEquals(1, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.FEMALE));
+        assertEquals(1, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.C1));
+        assertEquals(1, aiWithK1.getTotalNumberOfWordsByType(ClassificationType.C2));
     }
 
     @Test
     public void testTrainAndClassify() throws Exception {
-        aiWithK1.train(MALE, ClassificationType.MALE);
-        aiWithK1.train(FEMALE, ClassificationType.FEMALE);
-        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE));
-        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE));
-        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE_TEST));
-        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE_TEST));
+        aiWithK1.train(MALE, ClassificationType.C1);
+        aiWithK1.train(FEMALE, ClassificationType.C2);
+        assertEquals(ClassificationType.C1, aiWithK1.classify(MALE));
+        assertEquals(ClassificationType.C2, aiWithK1.classify(FEMALE));
+        assertEquals(ClassificationType.C1, aiWithK1.classify(MALE_TEST));
+        assertEquals(ClassificationType.C2, aiWithK1.classify(FEMALE_TEST));
 
         aiWithK1.setThreshold(2);
-        aiWithK1.train(MALE_TEST, ClassificationType.MALE);
-        aiWithK1.train(FEMALE_TEST, ClassificationType.FEMALE);
-        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE));
-        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE));
-        assertEquals(ClassificationType.MALE, aiWithK1.classify(MALE_TEST));
-        assertEquals(ClassificationType.FEMALE, aiWithK1.classify(FEMALE_TEST));
+        aiWithK1.train(MALE_TEST, ClassificationType.C1);
+        aiWithK1.train(FEMALE_TEST, ClassificationType.C2);
+        assertEquals(ClassificationType.C1, aiWithK1.classify(MALE));
+        assertEquals(ClassificationType.C2, aiWithK1.classify(FEMALE));
+        assertEquals(ClassificationType.C1, aiWithK1.classify(MALE_TEST));
+        assertEquals(ClassificationType.C2, aiWithK1.classify(FEMALE_TEST));
     }
 
     @Test
@@ -83,8 +82,8 @@ public class AITest {
         assertTrue(ai2.canCreateArffDataFile());
         assertFalse(ai3.canCreateArffDataFile());
 
-        ai2.train(TEST1, ClassificationType.MALE);
-        ai2.train(TEST1, ClassificationType.FEMALE);
+        ai2.train(TEST1, ClassificationType.C1);
+        ai2.train(TEST1, ClassificationType.C2);
 
         ai2.createArffDataFile(new PrintWriter(System.out), "test");
     }

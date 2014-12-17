@@ -4,6 +4,7 @@ import mod6AI.ai.AI;
 import mod6AI.ai.ClassificationType;
 import mod6AI.ai.Tokenizer;
 import mod6AI.exceptions.UnsupportedTypeException;
+import mod6AI.util.ConfusionMatrix;
 import mod6AI.util.FileMerger;
 
 import java.io.File;
@@ -25,18 +26,18 @@ public class Simple {
     public static void test1() {
         AI ai = new AI(1, 0);
         Scanner in = new Scanner(System.in);
-        System.out.print("Path directory with male training data: ");
-        String maleTrainPath = in.nextLine();
-        System.out.print("Path directory with female training data: ");
-        String femaleTrainPath = in.nextLine();
+        System.out.printf("Path directory with %s training data: ", ClassificationType.C1);
+        String c1TrainPath = in.nextLine();
+        System.out.printf("Path directory with %s training data: ", ClassificationType.C2);
+        String c2TrainPath = in.nextLine();
         System.out.println("Training...");
         System.out.println(LocalDateTime.now());
         System.out.println(System.currentTimeMillis());
 
         try {
-            ai.train(FileMerger.mergeAllTextFilesInDirectory(maleTrainPath), ClassificationType.MALE);
-            ai.train(FileMerger.mergeAllTextFilesInDirectory(femaleTrainPath), ClassificationType.FEMALE);
-        } catch (IOException | UnsupportedTypeException e) {
+            ai.train(FileMerger.mergeAllTextFilesInDirectory(c1TrainPath), ClassificationType.C1);
+            ai.train(FileMerger.mergeAllTextFilesInDirectory(c2TrainPath), ClassificationType.C2);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -47,8 +48,8 @@ public class Simple {
         in.nextLine();
 
         try {
-            System.out.println(AI.getOccurrencesCount(Tokenizer.tokenize(FileMerger.mergeAllTextFilesInDirectory(maleTrainPath))));
-            System.out.println(AI.getOccurrencesCount(Tokenizer.tokenize(FileMerger.mergeAllTextFilesInDirectory(femaleTrainPath))));
+            System.out.println(AI.getOccurrencesCount(Tokenizer.tokenize(FileMerger.mergeAllTextFilesInDirectory(c1TrainPath))));
+            System.out.println(AI.getOccurrencesCount(Tokenizer.tokenize(FileMerger.mergeAllTextFilesInDirectory(c2TrainPath))));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,21 +59,21 @@ public class Simple {
         AI ai = new AI(1, 0, true);
 
         Scanner in = new Scanner(System.in);
-        System.out.print("Path directory with male training data: ");
-        String maleTrainPath = in.nextLine();
-        System.out.print("Path directory with female training data: ");
-        String femaleTrainPath = in.nextLine();
+        System.out.printf("Path directory with %s training data: ", ClassificationType.C1);
+        String c1TrainPath = in.nextLine();
+        System.out.printf("Path directory with %s training data: ", ClassificationType.C2);
+        String c2TrainPath = in.nextLine();
 
         System.out.println("Reading data...");
         long begin = System.currentTimeMillis();
         try {
-            for (File f : FileMerger.listFilesWithExtension(Paths.get(maleTrainPath), "txt")) {
-                ai.train(FileMerger.readFile(f), ClassificationType.MALE);
+            for (File f : FileMerger.listFilesWithExtension(Paths.get(c1TrainPath), "txt")) {
+                ai.train(FileMerger.readFile(f), ClassificationType.C1);
             }
-            for (File f : FileMerger.listFilesWithExtension(Paths.get(femaleTrainPath), "txt")) {
-                ai.train(FileMerger.readFile(f), ClassificationType.FEMALE);
+            for (File f : FileMerger.listFilesWithExtension(Paths.get(c2TrainPath), "txt")) {
+                ai.train(FileMerger.readFile(f), ClassificationType.C2);
             }
-        } catch (IOException | UnsupportedTypeException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         long end = System.currentTimeMillis();
@@ -93,29 +94,29 @@ public class Simple {
         System.out.println();
 
 
-        System.out.print("Path directory with male test data: ");
-        String maleTestPath = in.nextLine();
-        System.out.print("Path directory with female test data: ");
-        String femaleTestPath = in.nextLine();
+        System.out.printf("Path directory with %s test data: ", ClassificationType.C1);
+        String c1TestPath = in.nextLine();
+        System.out.printf("Path directory with %s test data: ", ClassificationType.C2);
+        String c2TestPath = in.nextLine();
 
         System.out.println("Reading data...");
         begin = System.currentTimeMillis();
 
         ArrayList<AI.DataSet> dataSets = new ArrayList<>();
         try {
-            FileMerger.listFilesWithExtension(Paths.get(maleTestPath), "txt")
+            FileMerger.listFilesWithExtension(Paths.get(c1TestPath), "txt")
                             .parallelStream()
                             .map(FileMerger::readFile)
                             .map(Tokenizer::tokenize)
                             .map(AI::getOccurrencesCount)
-                            .map(d -> new AI.ClassifiedDataSet(d, ClassificationType.MALE))
+                            .map(d -> new AI.ClassifiedDataSet(d, ClassificationType.C1))
                             .forEach(dataSets::add);
-            FileMerger.listFilesWithExtension(Paths.get(femaleTestPath), "txt")
+            FileMerger.listFilesWithExtension(Paths.get(c2TestPath), "txt")
                     .parallelStream()
                     .map(FileMerger::readFile)
                     .map(Tokenizer::tokenize)
                     .map(AI::getOccurrencesCount)
-                    .map(d -> new AI.ClassifiedDataSet(d, ClassificationType.FEMALE))
+                    .map(d -> new AI.ClassifiedDataSet(d, ClassificationType.C2))
                     .forEach(dataSets::add);
         } catch (IOException e) {
             e.printStackTrace();
@@ -142,16 +143,16 @@ public class Simple {
     public static AI trainedAI(int k, int threshold) {
         AI ai = new AI(k, threshold);
         Scanner in = new Scanner(System.in);
-        System.out.print("Path directory with male training data: ");
-        String maleTrainPath = in.nextLine();
-        System.out.print("Path directory with female training data: ");
-        String femaleTrainPath = in.nextLine();
+        System.out.printf("Path directory with %s training data: ", ClassificationType.C1);
+        String c1TrainPath = in.nextLine();
+        System.out.printf("Path directory with %s training data: ", ClassificationType.C2);
+        String c2TrainPath = in.nextLine();
         System.out.println("Training...");
 
         try {
-            ai.train(FileMerger.mergeAllTextFilesInDirectory(maleTrainPath), ClassificationType.MALE);
-            ai.train(FileMerger.mergeAllTextFilesInDirectory(femaleTrainPath), ClassificationType.FEMALE);
-        } catch (IOException | UnsupportedTypeException e) {
+            ai.train(FileMerger.mergeAllTextFilesInDirectory(c1TrainPath), ClassificationType.C1);
+            ai.train(FileMerger.mergeAllTextFilesInDirectory(c2TrainPath), ClassificationType.C2);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -164,53 +165,62 @@ public class Simple {
         AI ai = trainedAI(1, 0);
 
         Scanner in = new Scanner(System.in);
-        System.out.print("Path directory with male test data: ");
-        String maleTestPath = in.nextLine();
-        System.out.print("Path directory with female test data: ");
-        String femaleTestPath = in.nextLine();
+        System.out.printf("Path directory with %s test data: ", ClassificationType.C1);
+        String c1TestPath = in.nextLine();
+        System.out.printf("Path directory with %s test data: ", ClassificationType.C2);
+        String c2TestPath = in.nextLine();
 
-        Map<ClassificationType, Long> classifiedMaleTestData;
-        Map<ClassificationType, Long> classifiedFemaleTestData;
+        Map<ClassificationType, Long> classifiedC1TestData;
+        Map<ClassificationType, Long> classifiedC2TestData;
 
         double[] ks = {0.1, 0.25, 0.5, 0.75, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5, 3, 5};
-        int[] thresholds = {0, 2, 5, 10, 50, 100};
+        int[] thresholds = {0, 2, 5, 10, 25, 50, 75, 100, 150};
         for (double k : ks) {
             ai.setK(k);
             for (int threshold : thresholds) {
                 ai.setThreshold(threshold);
-                System.out.printf("Testing with k %f and threshold %d ...", k, threshold);
-                System.out.println();
-                classifiedMaleTestData = FileMerger.listFilesWithExtension(Paths.get(maleTestPath), "txt")
+                System.out.println(String.format("Testing with k %1.2f and threshold %d ...", k, threshold));
+
+                classifiedC1TestData = FileMerger.listFilesWithExtension(Paths.get(c1TestPath), "txt")
                         .stream()
                         .map(FileMerger::readFile)
                         .map(ai::classify)
                         .collect(Collectors.groupingBy(o -> o, Collectors.counting()));
-                classifiedFemaleTestData = FileMerger.listFilesWithExtension(Paths.get(femaleTestPath), "txt")
+                classifiedC2TestData = FileMerger.listFilesWithExtension(Paths.get(c2TestPath), "txt")
                         .stream()
                         .map(FileMerger::readFile)
                         .map(ai::classify)
                         .collect(Collectors.groupingBy(o -> o, Collectors.counting()));
 
-                System.out.println("   M    F <-- classified as");
-                System.out.println(String.format("%4d %4d | M", classifiedMaleTestData.get(ClassificationType.MALE),
-                        classifiedMaleTestData.get(ClassificationType.FEMALE)));
-                System.out.println(String.format("%4d %4d | M", classifiedFemaleTestData.get(ClassificationType.MALE),
-                        classifiedFemaleTestData.get(ClassificationType.FEMALE)));
+                ConfusionMatrix confusionMatrix = new ConfusionMatrix(
+                        classifiedC1TestData.get(ClassificationType.C1),
+                        classifiedC1TestData.get(ClassificationType.C2),
+                        classifiedC2TestData.get(ClassificationType.C1),
+                        classifiedC2TestData.get(ClassificationType.C2));
+
+                System.out.println(confusionMatrix);
+                System.out.println("--------------------------------------------");
             }
         }
     }
 
     public static void main(String[] args) {
-        try {
-            createArffs();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        Scanner in = new Scanner(System.in);
+        System.out.print("Name for C1: ");
+        ClassificationType.C1.setName(in.nextLine());
+        System.out.print("Name for C2: ");
+        ClassificationType.C2.setName(in.nextLine());
+
 //        try {
-//            testPerformance();
-//        } catch (IOException e) {
+//            createArffs();
+//        } catch (FileNotFoundException e) {
 //            e.printStackTrace();
 //        }
+        try {
+            testPerformance();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
