@@ -1,29 +1,27 @@
 package mod6AI.ai;
 
-import mod6AI.exceptions.UnsupportedTypeException;
-
 /**
 * Created by Student on 30-11-2014.
 */
 public class OccurrencesPerType {
 
-    /** The number of occurrences for males. */
-    private long male;
-    /** The number of occurrences for females. */
-    private long female;
+    /** The number of occurrences for {@code ClassificationType.C1}. */
+    private long c1;
+    /** The number of occurrences for {@code ClassificationType.C2}. */
+    private long c2;
 
     /**
-     * Initializes a OccurrencesPerType with the given values for male and female.
-     * @param male number of occurrences for males.
-     * @param female number of occurrences for females.
+     * Initializes a OccurrencesPerType with the given values for both types.
+     * @param c1 number of occurrences for {@code ClassificationType.C1}.
+     * @param c2 number of occurrences for {@code ClassificationType.C2}.
      */
-    public OccurrencesPerType(long male, long female) {
-        this.male = male;
-        this.female = female;
+    public OccurrencesPerType(long c1, long c2) {
+        this.c1 = c1;
+        this.c2 = c2;
     }
 
     /**
-     * Initializes a OccurrencesPerType with zero occurrences for male and female.
+     * Initializes a OccurrencesPerType with zero occurrences for both types.
      */
     public OccurrencesPerType() {
         this(0, 0);
@@ -34,7 +32,7 @@ public class OccurrencesPerType {
      * @return the total number of occurrences.
      */
     public long getTotal() {
-        return male + female;
+        return c1 + c2;
     }
 
     /**
@@ -42,14 +40,14 @@ public class OccurrencesPerType {
      * @param type the {@code ClassificationType}.
      * @return The number of occurrences for males.
      */
-    public long get(ClassificationType type) throws UnsupportedTypeException {
+    public Long get(ClassificationType type) {
         switch (type) {
-            case MALE:
-                return getMale();
-            case FEMALE:
-                return getFemale();
+            case C1:
+                return getC1();
+            case C2:
+                return getC2();
             default:
-                throw new UnsupportedTypeException();
+                return null;
         }
     }
 
@@ -58,16 +56,14 @@ public class OccurrencesPerType {
      * @param type the {@code ClassificationType}.
      * @param value the number of occurrences.
      */
-    public void set(ClassificationType type, long value) throws UnsupportedTypeException {
+    public void set(ClassificationType type, long value) {
         switch (type) {
-            case MALE:
-                setMale(value);
+            case C1:
+                setC1(value);
                 break;
-            case FEMALE:
-                setFemale(value);
+            case C2:
+                setC2(value);
                 break;
-            default:
-                throw new UnsupportedTypeException();
         }
     }
 
@@ -77,70 +73,68 @@ public class OccurrencesPerType {
      * @param value the value to add.
      * @return this {@code OccurrencesPerType}.
      */
-    public OccurrencesPerType add(ClassificationType type, long value) throws UnsupportedTypeException {
+    public OccurrencesPerType add(ClassificationType type, long value) {
         switch (type) {
-            case MALE:
-                addMale(value);
+            case C1:
+                addC1(value);
                 break;
-            case FEMALE:
-                addFemale(value);
+            case C2:
+                addC2(value);
                 break;
-            default:
-                throw new UnsupportedTypeException();
         }
 
         return this;
     }
 
     /**
-     * Gets the number of occurrences for males.
-     * @return The number of occurrences for males.
+     * Gets the number of occurrences for {@code ClassificationType.C1}.
+     * @return The number of occurrences for {@code ClassificationType.C1}.
      */
-    public long getMale() {
-        return male;
+    public long getC1() {
+        return c1;
     }
 
     /**
-     * Sets the number of occurrences for males.
-     * @param male the number of occurrences.
+     * Sets the number of occurrences for {@code ClassificationType.C1}.
+     * @param value the number of occurrences.
      */
-    public void setMale(long male) {
-        this.male = male;
+    public void setC1(long value) {
+        c1 = value;
     }
 
     /**
-     * Adds the given value to the number of occurrences for males.
+     * Adds the given value to the number of occurrences for {@code ClassificationType.C1}.
      * @param value the value to add.
      * @return this {@code OccurrencesPerType}.
      */
-    public OccurrencesPerType addMale(long value) {
-        this.male += value;
+    public OccurrencesPerType addC1(long value) {
+        this.c1 += value;
         return this;
     }
 
     /**
-     * Gets the number of occurrences for females.
-     * @return The number of occurrences for females.
+     * Gets the number of occurrences for {@code ClassificationType.C2}.
+     * @return The number of occurrences for {@code ClassificationType.C2}.
      */
-    public long getFemale() {
-        return female;
+    public long getC2() {
+        return c2;
     }
 
     /**
-     * Sets the number of occurrences for males.
-     * @param female the number of occurrences.
+     * Sets the number of occurrences for {@code ClassificationType.C2}.
+     * @param value the number of occurrences.
      */
-    public void setFemale(long female) {
-        this.female = female;
+    public void setC2(long value) {
+        c2 = value;
     }
 
     /**
-     * Adds the given value to the number of occurrences for females.
+     * Adds the given value to the number of occurrences for {@code ClassificationType.C2}.
      * @param value the value to add.
      * @return this {@code OccurrencesPerType}.
      */
-    public OccurrencesPerType addFemale(long value) {
-        this.female += value;
+    public OccurrencesPerType addC2(long value) {
+        c2 += value;
         return this;
     }
 }

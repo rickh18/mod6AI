@@ -77,11 +77,11 @@ public class ListItem extends JLabel {
 	public ClassificationType getClassificationType(boolean correct) {
 		if (!correct) {
 			switch (type) {
-			case FEMALE:
-				setClassificationType(ClassificationType.MALE);
+			case C2:
+				setClassificationType(ClassificationType.C1);
 				break;
-			case MALE:
-				setClassificationType(ClassificationType.FEMALE);
+			case C1:
+				setClassificationType(ClassificationType.C2);
 				break;
 			default:
 				return null;
@@ -93,7 +93,7 @@ public class ListItem extends JLabel {
 
 	public void setClassificationType(ClassificationType type) {
 		this.type = type;
-		if (type.equals(ClassificationType.MALE))
+		if (type.equals(ClassificationType.C1))
 			icoPrediction = icoMale;
 		else
 			icoPrediction = icoFemale;

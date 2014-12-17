@@ -130,8 +130,8 @@ public class AI {
         this.arff = arff;
         vocabulary = new HashMap<>();
         totalNumberOfWordsByType = new HashMap<>();
-        totalNumberOfWordsByType.put(ClassificationType.MALE, 0);
-        totalNumberOfWordsByType.put(ClassificationType.FEMALE, 0);
+        totalNumberOfWordsByType.put(ClassificationType.C1, 0);
+        totalNumberOfWordsByType.put(ClassificationType.C2, 0);
         classifiedDataSets = new ArrayList<>();
     }
 
@@ -180,24 +180,14 @@ public class AI {
      * @param in a String to train with.
      * @param type the ClassificationType of the training String.
      */
-    public synchronized void train(String in, ClassificationType type) throws UnsupportedTypeException {
+    public synchronized void train(String in, ClassificationType type) {
         Collection<String> tokens = Tokenizer.tokenize(in);
 
         totalNumberOfWordsByType.put(type, totalNumberOfWordsByType.get(type) + tokens.size());
 
         Map<String, Long> occurrencesCount = getOccurrencesCount(tokens);
-        switch (type) {
-            case MALE:
-                occurrencesCount.forEach((word, count) ->
-                        vocabulary.put(word, vocabulary.getOrDefault(word, new OccurrencesPerType()).addMale(count)));
-                break;
-            case FEMALE:
-                occurrencesCount.forEach((word, count) ->
-                        vocabulary.put(word, vocabulary.getOrDefault(word, new OccurrencesPerType()).addFemale(count)));
-                break;
-            default:
-                throw new UnsupportedTypeException();
-        }
+        occurrencesCount.forEach((word, count) ->
+                        vocabulary.put(word, vocabulary.getOrDefault(word, new OccurrencesPerType()).add(type, count)));
         if (arff) {
             classifiedDataSets.add(new ClassifiedDataSet(occurrencesCount, type));
         }
@@ -208,15 +198,15 @@ public class AI {
     /**
      * Classifies the input.
      * @param in a String to classify.
-     * @return {@code ClassificationType.MALE} or {@code ClassificationType.FEMALE}.
+     * @return {@code ClassificationType.C1} or {@code ClassificationType.C2}.
      */
     public synchronized ClassificationType classify(String in) {
         Collection<String> tokens = Tokenizer.tokenize(in);
 
-        double chanceM = calculateChanceForType(tokens, ClassificationType.MALE);
-        double chanceF = calculateChanceForType(tokens, ClassificationType.FEMALE);
+        double chanceM = calculateChanceForType(tokens, ClassificationType.C1);
+        double chanceF = calculateChanceForType(tokens, ClassificationType.C2);
 
-        return chanceM > chanceF ? ClassificationType.MALE : ClassificationType.FEMALE;
+        return chanceM > chanceF ? ClassificationType.C1 : ClassificationType.C2;
     }
 
     /**
@@ -242,12 +232,7 @@ public class AI {
         long wordFreq = 0;
         OccurrencesPerType occurrencesPerType = vocabulary.get(word);
         if (occurrencesPerType != null) {
-            try {
-                wordFreq = vocabulary.get(word).get(type);
-            } catch (UnsupportedTypeException e) {
-                e.printStackTrace();
-                System.exit(-1);
-            }
+            wordFreq = vocabulary.get(word).get(type);
         }
 
         return (wordFreq + k) / (getTotalNumberOfWordsByType(type) + k * getCachedVocabularySizeAboveThreshold());
@@ -353,7 +338,7 @@ public class AI {
         printWriter.printf("@RELATION '%s'", name).println();
         printWriter.println();
         attributes.forEach(a -> printWriter.printf("@ATTRIBUTE %s NUMERIC", a).println());
-        printWriter.println("@ATTRIBUTE @@class@@ {F,M}");
+        printWriter.printf("@ATTRIBUTE @@class@@ {%s,%s}", ClassificationType.C2, ClassificationType.C1).println();
         printWriter.println();
         printWriter.println("@DATA");
         for (DataSet ds : data) {

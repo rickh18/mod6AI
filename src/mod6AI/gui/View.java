@@ -189,13 +189,8 @@ public class View extends JFrame implements Observer {
 				if (parent.getClass().equals(ListItem.class)) {
 					item = (ListItem) parent;
 					item.changeButton();
-					try {
-						ai.train(item.getText(), item
-								.getClassificationType(icon
-										.equals(ListItem.icoCorrectHover)));
-					} catch (UnsupportedTypeException e1) {
-						e1.printStackTrace();
-					}
+					ai.train(item.getText(), item.getClassificationType(icon
+							.equals(ListItem.icoCorrectHover)));
 					update();
 				}
 			}
