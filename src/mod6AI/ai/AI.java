@@ -289,11 +289,7 @@ public class AI {
      * otherwise {@code false}, this will be the case when this AI was not created with the arff option set.
      */
     public boolean createArffDataFile(Writer writer, String name) {
-        if (!arff) {
-            return false;
-        }
-
-        return createArffDataFile(classifiedDataSets, writer, name);
+        return !arff && createArffDataFile(classifiedDataSets, writer, name);
     }
 
     /**

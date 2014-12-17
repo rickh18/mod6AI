@@ -45,46 +45,90 @@ public class ConfusionMatrix {
         this.title = title;
     }
 
+    /**
+     * Gets the number of C1 instances classified as C1.
+     * @return the number of C1 instances classified as C1.
+     */
     public long getA() {
         return a;
     }
 
+    /**
+     * Gets the number of C1 instances classified as C2.
+     * @return the number of C1 instances classified as C2.
+     */
     public long getB() {
         return b;
     }
 
+    /**
+     * Gets the number of C2 instances classified as C1.
+     * @return the number of C2 instances classified as C1.
+     */
     public long getC() {
         return c;
     }
 
+    /**
+     * Gets the number of C2 instances classified as C2.
+     * @return the number of C2 instances classified as C2.
+     */
     public long getD() {
         return d;
     }
 
+    /**
+     * Calculates the accuracy of the classification represented in this matrix.
+     * @return the accuracy.
+     */
     public double accuracy() {
         return (a + d) / (double) (a + b + c + d);
     }
 
+    /**
+     * Calculates the error rate of the classification represented in this matrix.
+     * @return the error rate.
+     */
     public double errorRate() {
         return (b + c) / (double) (a + b + c + d);
     }
 
+    /**
+     * Calculates the recall for the first class of the classification represented in this matrix.
+     * @return the recall for the first class.
+     */
     public double recallC1() {
         return a / (double) (a + b);
     }
 
+    /**
+     * Calculates the recall for the second class of the classification represented in this matrix.
+     * @return the recall for the second class.
+     */
     public double recallC2() {
         return d / (double) (c + d);
     }
 
+    /**
+     * Calculates the precision for the first class of the classification represented in this matrix.
+     * @return the precision for the first class.
+     */
     public double precisionC1() {
         return a / (double) (a + c);
     }
 
+    /**
+     * Calculates the precision for the second class of the classification represented in this matrix.
+     * @return the precision for the second class.
+     */
     public double precisionC2() {
         return d / (double) (b + d);
     }
 
+    /**
+     * Gives a plaintext representation of this confusion matrix together with all the performance values.
+     * @return a plaintext representation of this confusion matrix together with all the performance values.
+     */
     public String toString() {
         StringBuilder result = new StringBuilder();
         if (title != null) {
