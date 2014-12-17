@@ -89,7 +89,7 @@ public class AI {
     /**
      * A map containing the total number of words in the training set per {@code ClassificationType}.
      */
-    private HashMap<ClassificationType, Integer> totalNumberOfWordsByType;
+    private HashMap<ClassificationType, Long> totalNumberOfWordsByType;
     /**
      * Holds all classified data sets with which this AI is trained, when this AI was created with the arff option set.
      * If the arff option was not set this collection will not be populated.
@@ -128,8 +128,8 @@ public class AI {
         this.arff = arff;
         vocabulary = new HashMap<>();
         totalNumberOfWordsByType = new HashMap<>();
-        totalNumberOfWordsByType.put(ClassificationType.C1, 0);
-        totalNumberOfWordsByType.put(ClassificationType.C2, 0);
+        totalNumberOfWordsByType.put(ClassificationType.C1, 0L);
+        totalNumberOfWordsByType.put(ClassificationType.C2, 0L);
         classifiedDataSets = new ArrayList<>();
     }
 
@@ -169,7 +169,7 @@ public class AI {
      * @param type the {@code ClassificationType}
      * @return the total number of words in all documents written by the given type.
      */
-    public int getTotalNumberOfWordsByType(ClassificationType type) {
+    public long getTotalNumberOfWordsByType(ClassificationType type) {
         return totalNumberOfWordsByType.get(type);
     }
 
