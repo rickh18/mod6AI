@@ -15,6 +15,8 @@ public class ConfusionMatrix {
     private final long c;
     /** The number of C2 instances classified as C2 */
     private final long d;
+    /** A title for the matrix. */
+    private String title;
 
     /**
      * Initializes a new ConfusionMatrix for two classes, C1 and C2.
@@ -28,6 +30,19 @@ public class ConfusionMatrix {
         this.b = b;
         this.c = c;
         this.d = d;
+    }
+
+    /**
+     * Initializes a new ConfusionMatrix with a title for two classes, C1 and C2.
+     * @param a the number of C1 instances classified as C1.
+     * @param b the number of C1 instances classified as C2.
+     * @param c the number of C2 instances classified as C1.
+     * @param d the number of C2 instances classified as C2.
+     * @param title a title for the matrix.
+     */
+    public ConfusionMatrix(long a, long b, long c, long d, String title) {
+        this(a, b, c, d);
+        this.title = title;
     }
 
     public long getA() {
@@ -72,6 +87,10 @@ public class ConfusionMatrix {
 
     public String toString() {
         StringBuilder result = new StringBuilder();
+        if (title != null) {
+            result.append(title);
+            result.append(System.lineSeparator());
+        }
         result.append(String.format("%4s %4s <-- classified as", ClassificationType.C1, ClassificationType.C2));
         result.append(System.lineSeparator());
         result.append(String.format("%4d %4d | %s", a, b, ClassificationType.C1));
