@@ -1,13 +1,15 @@
 package mod6AI.gui;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Observable;
@@ -15,17 +17,19 @@ import java.util.Observer;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import mod6AI.ai.AI;
-import mod6AI.ai.ClassificationType;
+import mod6AI.exceptions.UnsupportedTypeException;
 
 public class View extends JFrame implements Observer {
 
@@ -36,10 +40,11 @@ public class View extends JFrame implements Observer {
 	private String title = "Gender Guesser";
 	private JPanel list;
 	private JButton button;
-	private View view;
 	private JTextField input;
-	ImageIcon imgMale;
-	ImageIcon imgFemale;
+	private JScrollBar vertical;
+	private MouseController controller;
+
+	private AI ai;
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -48,29 +53,16 @@ public class View extends JFrame implements Observer {
 				new View(ai);
 			}
 		});
-
 	}
 
 	public View(AI ai) {
 		super();
-		view = this;
 
+		this.ai = ai;
 		// Nice blue color for background
 		Color bgColor = new Color(180, 220, 240);
 
 		// Screen with gridbaglayout
-		/**
-		 * -------------------------------
-		 * |-----------------------------|
-		 * ||scrpPane				|	 |
-		 * ||-----------------------|	 |
-		 * |||list			|label| |	 |
-		 * |-------------------------	 |
-		 * |-----------------------------|
-		 * ||input				|buttton||
-		 * |-----------------------------|
-		 * -------------------------------
-		 */
 		JPanel panel = new JPanel();
 		panel.setLayout(new GridBagLayout());
 		panel.setBorder(BorderFactory.createLineBorder(bgColor, 20));
@@ -95,6 +87,8 @@ public class View extends JFrame implements Observer {
 				.getWidth()));
 		panel.add(scrPane, c);
 
+		vertical = scrPane.getVerticalScrollBar();
+
 		// Input field
 		c.gridwidth = 1;
 		c.weightx = 5;
@@ -111,22 +105,23 @@ public class View extends JFrame implements Observer {
 		button.setFont(new Font("Serif", Font.BOLD, 30));
 		panel.add(button, c);
 
-		// Add controller
+		// Add controllers
 		new GuiController(ai);
+		controller = new MouseController();
+
+		// We shall not discriminate!
+		ImageIcon icon;
+		if (Math.random() >= 0.5)
+			icon = new ImageIcon("resources/male.png");
+		else
+			icon = new ImageIcon("resources/female.png");
 
 		// Frame parameters
-		ImageIcon icon = new ImageIcon("resources/male.png");
 		this.setIconImage(icon.getImage());
 		this.setTitle(title);
 		this.setSize(665, 720);
 		this.setResizable(false);
 		this.setVisible(true);
-
-		// setting images
-		imgMale = scaleImage(new ImageIcon("resources/male.png").getImage(),
-				50, 50);
-		imgFemale = scaleImage(
-				new ImageIcon("resources/female.png").getImage(), 50, 50);
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -135,66 +130,16 @@ public class View extends JFrame implements Observer {
 		});
 	}
 
-	/**
-	 * Adding a new item to the list
-	 * 
-	 * @param text
-	 *            text of the item.
-	 * @param type
-	 *            type of the item.
-	 */
-	private void addItem(String text, ClassificationType type) {
-		ImageIcon image;
-
-		if (type.equals(ClassificationType.MALE))
-			image = imgMale;
-		else
-			image = imgFemale;
-
-		JPanel item = new JPanel();
-		item.setLayout(new GridBagLayout());
-
-		// GridBagConstraints
-		GridBagConstraints d = new GridBagConstraints();
-		d.anchor = GridBagConstraints.NORTH;
-		d.fill = GridBagConstraints.HORIZONTAL;
-
-		// text
-		d.weightx = 9;
-		JLabel label = new JLabel(text);
-		label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		label.setVerticalAlignment(JLabel.TOP);
-		label.setFont(new Font("Serif", Font.PLAIN, 20));
-		label.setMinimumSize(new Dimension(540, 60));
-		label.setPreferredSize(new Dimension(540, 60));
-		item.add(label, d);
-
-		// image
-		d.weightx = 1;
-		d.gridx = 1;
-		JLabel prediction = new JLabel();
-		prediction.setIcon(image);
-		prediction.setHorizontalAlignment(JLabel.CENTER);
-		prediction.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		prediction.setMinimumSize(new Dimension(60, 60));
-		prediction.setPreferredSize(new Dimension(60, 60));
-		item.add(prediction, d);
-
-		// item parameters
-		item.setPreferredSize(new Dimension(600, 60));
-		item.setMaximumSize(new Dimension(600, 60));
-
-		// adding to list
-		list.add(item);
-
-		// Repainting
-		view.getContentPane().validate();
-		view.getContentPane().repaint();
+	@Override
+	public void update(Observable o, Object arg) {
 
 	}
 
-	@Override
-	public void update(Observable o, Object arg) {
+	public void update() {
+		// Repainting
+		this.getContentPane().validate();
+		this.getContentPane().repaint();
+		vertical.setValue(vertical.getMaximum());
 	}
 
 	/**
@@ -218,7 +163,74 @@ public class View extends JFrame implements Observer {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			addItem(input.getText(), ai.classify(input.getText()));
+			if (e.getSource().equals(button)) {
+				list.add(new ListItem(input.getText(), ai.classify(input
+						.getText()), controller));
+				update();
+			}
+		}
+
+	}
+
+	public class MouseController implements MouseListener {
+
+		public MouseController() {
+			button.addMouseListener(this);
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			Object source = e.getSource();
+			Object parent = ((Component) source).getParent();
+			ListItem item = null;
+
+			if (source.getClass().equals(JLabel.class)) {
+				Icon icon = ((JLabel) source).getIcon();
+				if (parent.getClass().equals(ListItem.class)) {
+					item = (ListItem) parent;
+					item.changeButton();
+					try {
+						ai.train(item.getText(), item
+								.getClassificationType(icon
+										.equals(ListItem.icoCorrectHover)));
+					} catch (UnsupportedTypeException e1) {
+						e1.printStackTrace();
+					}
+					update();
+				}
+			}
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			if (e.getSource().getClass().equals(JLabel.class)) {
+				JLabel b = (JLabel) e.getSource();
+				if (b.getIcon().equals(ListItem.icoCorrect)) {
+					b.setIcon(ListItem.icoCorrectHover);
+				} else if (b.getIcon().equals(ListItem.icoWrong)) {
+					b.setIcon(ListItem.icoWrongHover);
+				}
+			}
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			if (e.getSource().getClass().equals(JLabel.class)) {
+				JLabel b = (JLabel) e.getSource();
+				if (b.getIcon().equals(ListItem.icoCorrectHover)) {
+					b.setIcon(ListItem.icoCorrect);
+				} else if (b.getIcon().equals(ListItem.icoWrongHover)) {
+					b.setIcon(ListItem.icoWrong);
+				}
+			}
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
 		}
 
 	}
@@ -227,19 +239,22 @@ public class View extends JFrame implements Observer {
 	 * Scale function to scale the imageIcons.
 	 * 
 	 * @param image
-	 *            the <code>image</code> to be scaled.
+	 *            ...... the <code>String</code> location of the image to be
+	 *            scaled.
 	 * @param width
 	 *            the desired <code>width</code>
 	 * @param height
 	 *            the desired <code>height</code>
 	 * @return Image <code>image</code> of the scaled image.
 	 */
-	public ImageIcon scaleImage(Image image, int width, int height) {
+	public static ImageIcon scaleImage(String resource, int width, int height) {
+		ImageIcon imageIcon = new ImageIcon(resource);
+
 		if (width == 0 || height == 0) {
-			return new ImageIcon(image);
+			return imageIcon;
 		} else {
-			return new ImageIcon(image.getScaledInstance(width, height,
-					java.awt.Image.SCALE_SMOOTH));
+			return new ImageIcon(imageIcon.getImage().getScaledInstance(width,
+					height, java.awt.Image.SCALE_SMOOTH));
 		}
 	}
 
