@@ -376,6 +376,7 @@ public class AI {
         out.close();
     }
 
+    @SuppressWarnings("unchecked")
     public boolean load(String file) throws FileNotFoundException {
         try(ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             Object object = in.readObject();
