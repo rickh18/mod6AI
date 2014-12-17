@@ -3,7 +3,6 @@ package mod6AI.controller;
 import mod6AI.ai.AI;
 import mod6AI.ai.ClassificationType;
 import mod6AI.ai.Tokenizer;
-import mod6AI.exceptions.UnsupportedTypeException;
 import mod6AI.util.ConfusionMatrix;
 import mod6AI.util.FileMerger;
 

@@ -1,7 +1,5 @@
 package mod6AI.ai;
 
-import mod6AI.exceptions.UnsupportedTypeException;
-
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.*;

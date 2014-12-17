@@ -29,7 +29,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import mod6AI.ai.AI;
-import mod6AI.exceptions.UnsupportedTypeException;
 
 public class View extends JFrame implements Observer {
 
