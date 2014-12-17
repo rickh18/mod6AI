@@ -1,9 +1,6 @@
 package mod6AI.ai;
 
-import mod6AI.exceptions.UnsupportedTypeException;
-
-import java.io.PrintWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -91,7 +88,7 @@ public class AI {
     /**
      * A map containing the total number of words in the training set per {@code ClassificationType}.
      */
-    private HashMap<ClassificationType, Integer> totalNumberOfWordsByType;
+    private HashMap<ClassificationType, Long> totalNumberOfWordsByType;
     /**
      * Holds all classified data sets with which this AI is trained, when this AI was created with the arff option set.
      * If the arff option was not set this collection will not be populated.
@@ -130,8 +127,8 @@ public class AI {
         this.arff = arff;
         vocabulary = new HashMap<>();
         totalNumberOfWordsByType = new HashMap<>();
-        totalNumberOfWordsByType.put(ClassificationType.C1, 0);
-        totalNumberOfWordsByType.put(ClassificationType.C2, 0);
+        totalNumberOfWordsByType.put(ClassificationType.C1, 0L);
+        totalNumberOfWordsByType.put(ClassificationType.C2, 0L);
         classifiedDataSets = new ArrayList<>();
     }
 
@@ -171,7 +168,7 @@ public class AI {
      * @param type the {@code ClassificationType}
      * @return the total number of words in all documents written by the given type.
      */
-    public int getTotalNumberOfWordsByType(ClassificationType type) {
+    public long getTotalNumberOfWordsByType(ClassificationType type) {
         return totalNumberOfWordsByType.get(type);
     }
 
@@ -229,6 +226,10 @@ public class AI {
      * @return the chance that the given word indicates the given type.
      */
     private double getChance(String word, ClassificationType type) {
+        if (getTotalNumberOfWordsByType(type) == 0) {
+            return 0;
+        }
+
         long wordFreq = 0;
         OccurrencesPerType occurrencesPerType = vocabulary.get(word);
         if (occurrencesPerType != null) {
@@ -366,6 +367,33 @@ public class AI {
             printWriter.println(buf);
         }
 
+        return true;
+    }
+
+    public void save(String file) throws IOException {
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+        out.writeObject(vocabulary);
+        out.close();
+    }
+
+    public boolean load(String file) throws FileNotFoundException {
+        try {
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+
+            Object object = in.readObject();
+            vocabulary = (HashMap<String, OccurrencesPerType>) object;
+        } catch (ClassNotFoundException | IOException e) {
+            return false;
+        }
+
+        vocabulary.values().forEach(o -> {
+            totalNumberOfWordsByType.put(ClassificationType.C1,
+                    totalNumberOfWordsByType.get(ClassificationType.C1) + o.getC1());
+            totalNumberOfWordsByType.put(ClassificationType.C2,
+                    totalNumberOfWordsByType.get(ClassificationType.C2) + o.getC2());
+        });
+
+        updateCachedVocabularySizeAboveThreshold();
         return true;
     }
 }
