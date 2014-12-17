@@ -215,10 +215,37 @@ public class Simple {
 //        } catch (FileNotFoundException e) {
 //            e.printStackTrace();
 //        }
+//        try {
+//            testPerformance();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        AI ai = trainedAI(1,0);
+        System.out.print("Where to save: ");
+        String file = in.nextLine();
         try {
-            testPerformance();
+            ai.save(file);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        AI ai2 = new AI(1);
+        boolean success = false;
+        try {
+            success = ai2.load(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        if (success) {
+            System.out.println(ai.classify("Test"));
+            System.out.println(ai2.classify("Test"));
+
+            if (ai.getTotalNumberOfWordsByType(ClassificationType.C1) == ai2.getTotalNumberOfWordsByType(ClassificationType.C1)
+                    && ai.getTotalNumberOfWordsByType(ClassificationType.C2) == ai2.getTotalNumberOfWordsByType(ClassificationType.C2)) {
+                System.out.println(":)");
+            } else {
+                System.out.println(":(");
+            }
         }
     }
 
