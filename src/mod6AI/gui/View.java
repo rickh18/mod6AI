@@ -36,6 +36,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import mod6AI.ai.AI;
 import mod6AI.ai.ClassificationType;
@@ -62,6 +63,8 @@ public class View extends JFrame implements Observer {
 	private String[] options = { "Gender classifier", "Mail classifier",
 			"Open file" };
 	private JFileChooser fc;
+	private FileNameExtensionFilter gender;
+	private FileNameExtensionFilter mail;
 	private JStatusBar statusBar;
 	private JTextField input;
 	private JScrollBar vertical;
@@ -74,6 +77,8 @@ public class View extends JFrame implements Observer {
 	public enum ClassificationName {
 		GENDER, MAIL
 	};
+
+	private String extension;
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -150,7 +155,6 @@ public class View extends JFrame implements Observer {
 		// First menu
 		menu = new JMenu("File");
 		menu.setMnemonic(KeyEvent.VK_F);
-		menu.getAccessibleContext().setAccessibleDescription("What is this?");
 		menuItems[0] = new JMenuItem("New Classifier", KeyEvent.VK_N);
 		menuItems[1] = new JMenuItem("Open File...", KeyEvent.VK_O);
 		menuItems[2] = new JMenuItem("Save As...", KeyEvent.VK_S);
@@ -168,6 +172,14 @@ public class View extends JFrame implements Observer {
 
 		// FileChooser
 		fc = new JFileChooser();
+		gender = new FileNameExtensionFilter(
+				"Gender files (*.gender)", "gender");
+		mail = new FileNameExtensionFilter(
+				"Mail files (*.mail)", "mail");
+		fc.addChoosableFileFilter(gender);
+		fc.addChoosableFileFilter(mail);
+		fc.setFileFilter(gender);
+		fc.setFileFilter(mail);
 
 		// Add controllers
 		new GuiController(ai);
@@ -334,11 +346,17 @@ public class View extends JFrame implements Observer {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fc.getSelectedFile();
 				try {
-					if (ai.load(file.getAbsolutePath()))
+					if (ai.load(file.getAbsolutePath())) {
 						statusBar.setMessage("File: " + file.getName()
 								+ " opened.");
-					else
+						if (file.getAbsolutePath().endsWith(".mail")) {
+							setIcon(ClassificationName.MAIL);
+						} else {
+							setIcon(ClassificationName.GENDER);
+						}
+					} else {
 						throw new FileNotFoundException();
+					}
 				} catch (FileNotFoundException e1) {
 					showWarning("Opening file error", "File: " + file.getName()
 							+ " could not be opened.");
@@ -349,6 +367,9 @@ public class View extends JFrame implements Observer {
 			returnVal = fc.showSaveDialog(View.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fc.getSelectedFile();
+				if (!file.getAbsolutePath().endsWith(extension)) {
+					file = new File(file.toString() + extension);
+				}
 				try {
 					ai.save(file.getAbsolutePath());
 					statusBar.setMessage("File saved as: " + file.getName()
@@ -407,11 +428,17 @@ public class View extends JFrame implements Observer {
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fc.getSelectedFile();
 				try {
-					if (ai.load(file.getAbsolutePath()))
+					if (ai.load(file.getAbsolutePath())) {
 						statusBar.setMessage("File: " + file.getName()
 								+ " opened.");
-					else
+						if (file.getAbsolutePath().endsWith(".mail")) {
+							setIcon(ClassificationName.MAIL);
+						} else {
+							setIcon(ClassificationName.GENDER);
+						}
+					} else {
 						throw new FileNotFoundException();
+					}
 				} catch (FileNotFoundException e1) {
 					showWarning("Opening file error", "File: " + file.getName()
 							+ " could not be opened.");
@@ -437,10 +464,12 @@ public class View extends JFrame implements Observer {
 		case MAIL:
 			res1 = "resources/spam.png";
 			res2 = "resources/ham.png";
+			extension = ".mail";
 			break;
 		case GENDER:
 			res1 = "resources/male.png";
 			res2 = "resources/female.png";
+			extension = ".gender";
 			break;
 		default:
 			break;
