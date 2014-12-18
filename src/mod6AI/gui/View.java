@@ -122,6 +122,7 @@ public class View extends JFrame implements Observer {
 		c.gridwidth = 2;
 		c.weighty = 8;
 		JScrollPane scrPane = new JScrollPane(list);
+		scrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		scrPane.setPreferredSize(new Dimension(scrPane.getHeight(), scrPane
 				.getWidth()));
 		panel.add(scrPane, c);
@@ -172,10 +173,9 @@ public class View extends JFrame implements Observer {
 
 		// FileChooser
 		fc = new JFileChooser();
-		gender = new FileNameExtensionFilter(
-				"Gender files (*.gender)", "gender");
-		mail = new FileNameExtensionFilter(
-				"Mail files (*.mail)", "mail");
+		gender = new FileNameExtensionFilter("Gender files (*.gender)",
+				"gender");
+		mail = new FileNameExtensionFilter("Mail files (*.mail)", "mail");
 		fc.addChoosableFileFilter(gender);
 		fc.addChoosableFileFilter(mail);
 		fc.setFileFilter(gender);
@@ -347,6 +347,8 @@ public class View extends JFrame implements Observer {
 				file = fc.getSelectedFile();
 				try {
 					if (ai.load(file.getAbsolutePath())) {
+						list.removeAll();
+						update();
 						statusBar.setMessage("File: " + file.getName()
 								+ " opened.");
 						if (file.getAbsolutePath().endsWith(".mail")) {
@@ -410,7 +412,6 @@ public class View extends JFrame implements Observer {
 				"What would you like to do?", "Choose option",
 				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
 				null, options, options[2]);
-		System.out.println(n);
 		switch (n) {
 		case JOptionPane.YES_OPTION:
 			ClassificationType.C1.setName("Male");
