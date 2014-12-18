@@ -32,20 +32,13 @@ public class ListItem extends JPanel {
 	private JLabel btnCorrected;
 	private GridBagConstraints d = new GridBagConstraints();
 
-	public static final ImageIcon icoMale = View.scaleImage(
-			"resources/male.png", 50, 50);
-	public static final ImageIcon icoFemale = View.scaleImage(
-			"resources/female.png", 50, 50);
-	public static final ImageIcon icoCorrect = View.scaleImage(
-			"resources/ico_correct.png", 60, 60);
-	public static final ImageIcon icoCorrectHover = View.scaleImage(
-			"resources/ico_correct_hover.png", 60, 60);
-	public static final ImageIcon icoWrong = View.scaleImage(
-			"resources/ico_wrong.png", 60, 60);
-	public static final ImageIcon icoWrongHover = View.scaleImage(
-			"resources/ico_wrong_hover.png", 60, 60);
-	public static final ImageIcon icoCorrected = View.scaleImage(
-			"resources/ico_corrected.png", 120, 60);
+	public static ImageIcon icoC1 = new ImageIcon("resources/male.png");
+	public static ImageIcon icoC2 = new ImageIcon("resources/female.png");
+	public static final ImageIcon icoCorrect = new ImageIcon("resources/ico_correct.png");
+	public static final ImageIcon icoCorrectHover = new ImageIcon("resources/ico_correct_hover.png");
+	public static final ImageIcon icoWrong = new ImageIcon("resources/ico_wrong.png");
+	public static final ImageIcon icoWrongHover = new ImageIcon("resources/ico_wrong_hover.png");
+	public static final ImageIcon icoCorrected = new ImageIcon("resources/ico_corrected.png");
 
 	public ListItem(String text, ClassificationType type,
 			MouseController controller) {
@@ -70,7 +63,7 @@ public class ListItem extends JPanel {
 	public String getText() {
 		return text;
 	}
-	
+
 	public void setText(String text) {
 		this.text = text;
 	}
@@ -95,9 +88,24 @@ public class ListItem extends JPanel {
 	public void setClassificationType(ClassificationType type) {
 		this.type = type;
 		if (type.equals(ClassificationType.C1))
-			icoPrediction = icoMale;
+			icoPrediction = icoC1;
 		else
-			icoPrediction = icoFemale;
+			icoPrediction = icoC2;
+	}
+	
+	public static void setClassificationName(View.ClassificationName name ){
+		switch (name) {
+		case MAIL:
+			 icoC1 = new ImageIcon("resources/spam.png");
+			 icoC2 = new ImageIcon("resources/ham.png");
+			break;
+		case GENDER:
+			icoC1 = new ImageIcon("resources/male.png");
+			icoC2 = new ImageIcon("resources/female.png");
+			break;
+		default:
+			break;
+		}
 	}
 
 	public void changeButton() {
