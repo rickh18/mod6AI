@@ -127,7 +127,7 @@ public class Simple {
         arffPath = in.nextLine();
         writer = new PrintWriter(arffPath);
 
-        System.out.println("Creating arff data file from training data set...");
+        System.out.println("Creating arff data file from test data set...");
         begin = System.currentTimeMillis();
 
         ai.createArffDataFile(dataSets, writer, "blog_test");
