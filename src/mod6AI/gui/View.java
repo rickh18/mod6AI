@@ -42,11 +42,14 @@ import mod6AI.ai.ClassificationType;
 
 import com.sun.glass.events.KeyEvent;
 
+/**
+ * View for the Gui.
+ * 
+ * @author Rick Harms
+ *
+ */
 public class View extends JFrame implements Observer {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1229676347999028520L;
 	private String title = "Classifier group 3A";
 	private JPanel list;
@@ -81,6 +84,12 @@ public class View extends JFrame implements Observer {
 		});
 	}
 
+	/**
+	 * Contructor of View.
+	 * 
+	 * @param ai
+	 *            The <code>AI</code> ai to start with.
+	 */
 	public View(AI ai) {
 		super();
 		this.ai = ai;
@@ -187,6 +196,9 @@ public class View extends JFrame implements Observer {
 
 	}
 
+	/**
+	 * Updating the window, repaint the contentPane
+	 */
 	public void update() {
 		// Repainting
 		this.getContentPane().validate();
@@ -201,12 +213,16 @@ public class View extends JFrame implements Observer {
 	 *
 	 */
 	public class GuiController implements ActionListener {
+		/*
+		 * The <code>AI<code> ai that should be controlled.
+		 */
 		private AI ai;
 
 		/**
-		 * GuiController
+		 * GuiController for the send button and the menu items.
 		 * 
 		 * @param ai
+		 *            the <code>AI</code> ai to be controlled
 		 */
 		public GuiController(AI ai) {
 			this.ai = ai;
@@ -227,26 +243,26 @@ public class View extends JFrame implements Observer {
 				statusBar.setMessage("Item classified");
 				update();
 			} else if (source.getClass().equals(JMenuItem.class)) {
-				if (source.equals(info)){
-				JOptionPane.showMessageDialog(View.this,
-					    "Classifier. Made by Group 3A \n"
-					    + "Frans van dijk\n"
-					    + "Rick van Gemert\n"
-					    + "Remco Brunsveld and\n"
-					    + "Rick Harms",
-					    "Info",JOptionPane.PLAIN_MESSAGE);
-				}else{
+				if (source.equals(info)) {
+					JOptionPane.showMessageDialog(View.this,
+							"Classifier. Made by Group 3A \n"
+									+ "Frans van dijk\n" + "Rick van Gemert\n"
+									+ "Remco Brunsveld and\n" + "Rick Harms",
+							"Info", JOptionPane.PLAIN_MESSAGE);
+				} else {
 					menuAction((JMenuItem) source);
 				}
 			}
 		}
 	}
 
+	/**
+	 * Mouse controller to get input from the mouse.
+	 * 
+	 * @author Rick Harms
+	 *
+	 */
 	public class MouseController implements MouseListener {
-
-		public MouseController() {
-			button.addMouseListener(this);
-		}
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
@@ -298,9 +314,14 @@ public class View extends JFrame implements Observer {
 		@Override
 		public void mouseReleased(MouseEvent e) {
 		}
-
 	}
-	
+
+	/**
+	 * menuAction class. Handles all menu actrions from te different menu Items.
+	 * 
+	 * @param source
+	 *            <code>JMenuItem</code> that called the action.
+	 */
 	private void menuAction(JMenuItem source) {
 		int returnVal;
 		File file;
@@ -345,12 +366,24 @@ public class View extends JFrame implements Observer {
 		}
 	}
 
+	/**
+	 * Shows a MessageDialog with a warning
+	 * 
+	 * @param title
+	 *            The <code>String</code> title of the dialog.
+	 * @param warning
+	 *            The <code>String</code> warning message to be desplayed.
+	 */
 	private void showWarning(String title, String warning) {
 		statusBar.setMessage(warning);
 		JOptionPane.showMessageDialog(View.this, warning, title,
 				JOptionPane.ERROR_MESSAGE);
 	}
 
+	/**
+	 * This will show an OptionDialog to determine what should be done. Called
+	 * at the start of the View.
+	 */
 	private void showOptions() {
 		int n = JOptionPane.showOptionDialog(View.this,
 				"What would you like to do?", "Choose option",
@@ -390,6 +423,13 @@ public class View extends JFrame implements Observer {
 		}
 	}
 
+	/**
+	 * Sets the icon of the window.
+	 * 
+	 * @param name
+	 *            the <code>ClassificationName</code> name of the
+	 *            Classification.
+	 */
 	private void setIcon(ClassificationName name) {
 		String res1 = null;
 		String res2 = null;

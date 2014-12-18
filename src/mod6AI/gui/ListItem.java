@@ -14,8 +14,12 @@ import javax.swing.JPanel;
 import mod6AI.ai.ClassificationType;
 import mod6AI.gui.View.MouseController;
 
-//import mod6AI.gui.View.ListItem;
-
+/**
+ * Class to create a new item in a list. Extends <code>JPanel</code>
+ * 
+ * @author Rick Harms
+ *
+ */
 public class ListItem extends JPanel {
 	/**
 	 * 
@@ -32,14 +36,32 @@ public class ListItem extends JPanel {
 	private JLabel btnCorrected;
 	private GridBagConstraints d = new GridBagConstraints();
 
+	// Loading all images
 	public static ImageIcon icoC1 = new ImageIcon("resources/male.png");
 	public static ImageIcon icoC2 = new ImageIcon("resources/female.png");
-	public static final ImageIcon icoCorrect = new ImageIcon("resources/ico_correct.png");
-	public static final ImageIcon icoCorrectHover = new ImageIcon("resources/ico_correct_hover.png");
-	public static final ImageIcon icoWrong = new ImageIcon("resources/ico_wrong.png");
-	public static final ImageIcon icoWrongHover = new ImageIcon("resources/ico_wrong_hover.png");
-	public static final ImageIcon icoCorrected = new ImageIcon("resources/ico_corrected.png");
+	public static final ImageIcon icoCorrect = new ImageIcon(
+			"resources/ico_correct.png");
+	public static final ImageIcon icoCorrectHover = new ImageIcon(
+			"resources/ico_correct_hover.png");
+	public static final ImageIcon icoWrong = new ImageIcon(
+			"resources/ico_wrong.png");
+	public static final ImageIcon icoWrongHover = new ImageIcon(
+			"resources/ico_wrong_hover.png");
+	public static final ImageIcon icoCorrected = new ImageIcon(
+			"resources/ico_corrected.png");
 
+	/**
+	 * Constructor to create a new ListItem
+	 * 
+	 * @param text
+	 *            The <code>String</code> text that should be displayed.
+	 * @param type
+	 *            The <code>ClassificationType</code> type that the text is set
+	 *            to.
+	 * @param controller
+	 *            The <code>MouseController</code> controller that is added to
+	 *            the buttons.
+	 */
 	public ListItem(String text, ClassificationType type,
 			MouseController controller) {
 		setClassificationType(type);
@@ -56,18 +78,43 @@ public class ListItem extends JPanel {
 		this.setMaximumSize(new Dimension(600, 60));
 	}
 
+	/**
+	 * Gets this ListItem.
+	 * 
+	 * @return <code>this</code>
+	 */
 	public ListItem getListItem() {
 		return this;
 	}
 
+	/**
+	 * Returns the <code>String</code> text of the ListItem.
+	 * 
+	 * @return
+	 */
 	public String getText() {
 		return text;
 	}
 
+	/**
+	 * Change the <code>String</code> text of this ListItem.
+	 * 
+	 * @param text
+	 */
 	public void setText(String text) {
 		this.text = text;
 	}
 
+	/**
+	 * Get the <code>ClassifcationType</code> this ListItem. Returns the inverse
+	 * if <code>boolean</code> correct = false;
+	 * 
+	 * @param correct
+	 *            <code>boolean</code> correct true if this
+	 *            <code>ClassificationType</code> is needed, false is the
+	 *            inverse is needed.
+	 * @return <code>ClassificationType</code> type of this ListItem.
+	 */
 	public ClassificationType getClassificationType(boolean correct) {
 		if (!correct) {
 			switch (type) {
@@ -85,6 +132,13 @@ public class ListItem extends JPanel {
 		return type;
 	}
 
+	/**
+	 * Change the <code>ClassificationType</code> type of this object. Also sets
+	 * the image.
+	 * 
+	 * @param type
+	 *            the <code>ClassificationType</code> type that has to be set.
+	 */
 	public void setClassificationType(ClassificationType type) {
 		this.type = type;
 		if (type.equals(ClassificationType.C1))
@@ -92,12 +146,19 @@ public class ListItem extends JPanel {
 		else
 			icoPrediction = icoC2;
 	}
-	
-	public static void setClassificationName(View.ClassificationName name ){
+
+	/**
+	 * Set the name of the <code>ClassificationType</code>. Changes the icons to
+	 * the correct ones.
+	 * 
+	 * @param name
+	 *            the <code>View.ClassificationName</code> name to be set.
+	 */
+	public static void setClassificationName(View.ClassificationName name) {
 		switch (name) {
 		case MAIL:
-			 icoC1 = new ImageIcon("resources/spam.png");
-			 icoC2 = new ImageIcon("resources/ham.png");
+			icoC1 = new ImageIcon("resources/spam.png");
+			icoC2 = new ImageIcon("resources/ham.png");
 			break;
 		case GENDER:
 			icoC1 = new ImageIcon("resources/male.png");
@@ -108,6 +169,9 @@ public class ListItem extends JPanel {
 		}
 	}
 
+	/**
+	 * Change the buttons to corrected.
+	 */
 	public void changeButton() {
 		this.remove(btnCorrect);
 		this.remove(btnWrong);
@@ -116,12 +180,22 @@ public class ListItem extends JPanel {
 		this.add(btnCorrected, d);
 	}
 
+	/**
+	 * Adding the <code>MouseController</code> controller to the correct and
+	 * wrong button.
+	 * 
+	 * @param controller
+	 *            the <code>MouseController</code> controller.
+	 */
 	private void addController(MouseController controller) {
 		// adding eventlistener
 		btnCorrect.addMouseListener(controller);
 		btnWrong.addMouseListener(controller);
 	}
 
+	/**
+	 * Adds the <code>JTextfield</code> and <code>JButtons</code> to this.
+	 */
 	private void drawLayout() {
 		// GridBagConstraints
 		d.anchor = GridBagConstraints.NORTH;
