@@ -76,17 +76,12 @@ public class View extends JFrame implements Observer {
 
 	public enum ClassificationName {
 		GENDER, MAIL
-	};
+	}
 
 	private String extension;
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				AI ai = new AI(1);
-				new View(ai);
-			}
-		});
+		SwingUtilities.invokeLater(() -> new View(new AI(1)));
 	}
 
 	/**
@@ -171,16 +166,6 @@ public class View extends JFrame implements Observer {
 		info = new JMenuItem("?");
 		menuBar.add(info);
 
-		// FileChooser
-		fc = new JFileChooser();
-		gender = new FileNameExtensionFilter("Gender files (*.gender)",
-				"gender");
-		mail = new FileNameExtensionFilter("Mail files (*.mail)", "mail");
-		fc.addChoosableFileFilter(gender);
-		fc.addChoosableFileFilter(mail);
-		fc.setFileFilter(gender);
-		fc.setFileFilter(mail);
-
 		// Add controllers
 		new GuiController(ai);
 		controller = new MouseController();
@@ -201,6 +186,17 @@ public class View extends JFrame implements Observer {
 				View.this.dispose();
 			}
 		});
+	}
+
+	private void createFileChooser() {
+		fc = new JFileChooser();
+		gender = new FileNameExtensionFilter("Gender files (*.gender)",
+				"gender");
+		mail = new FileNameExtensionFilter("Mail files (*.mail)", "mail");
+		fc.addChoosableFileFilter(gender);
+		fc.addChoosableFileFilter(mail);
+		fc.setFileFilter(gender);
+		fc.setFileFilter(mail);
 	}
 
 	@Override
@@ -280,7 +276,7 @@ public class View extends JFrame implements Observer {
 		public void mouseClicked(MouseEvent e) {
 			Object source = e.getSource();
 			Object parent = ((Component) source).getParent();
-			ListItem item = null;
+			ListItem item;
 
 			if (source.getClass().equals(JLabel.class)) {
 				Icon icon = ((JLabel) source).getIcon();
@@ -342,6 +338,7 @@ public class View extends JFrame implements Observer {
 			new View(new AI(ai.getK()));
 			break;
 		case "Open":
+			if (fc == null) createFileChooser();
 			returnVal = fc.showOpenDialog(View.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fc.getSelectedFile();
@@ -366,6 +363,7 @@ public class View extends JFrame implements Observer {
 			}
 			break;
 		case "Save":
+			if (fc == null) createFileChooser();
 			returnVal = fc.showSaveDialog(View.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fc.getSelectedFile();
@@ -425,6 +423,7 @@ public class View extends JFrame implements Observer {
 			break;
 		case JOptionPane.CANCEL_OPTION:
 			File file;
+			if (fc == null) createFileChooser();
 			int returnVal = fc.showOpenDialog(View.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				file = fc.getSelectedFile();
@@ -463,14 +462,16 @@ public class View extends JFrame implements Observer {
 		String res2 = null;
 		switch (name) {
 		case MAIL:
-			res1 = "resources/spam.png";
-			res2 = "resources/ham.png";
+			res1 = "resources/ham.png";
+			res2 = "resources/spam.png";
 			extension = ".mail";
+			ai.setK(0.1); ai.setThreshold(0);
 			break;
 		case GENDER:
 			res1 = "resources/male.png";
 			res2 = "resources/female.png";
 			extension = ".gender";
+			ai.setK(5.0); ai.setThreshold(0);
 			break;
 		default:
 			break;

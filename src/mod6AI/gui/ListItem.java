@@ -37,8 +37,8 @@ public class ListItem extends JPanel {
 	private GridBagConstraints d = new GridBagConstraints();
 
 	// Loading all images
-	public static ImageIcon icoC1 = new ImageIcon("resources/male.png");
-	public static ImageIcon icoC2 = new ImageIcon("resources/female.png");
+	public static ImageIcon icoC1;
+	public static ImageIcon icoC2;
 	public static final ImageIcon icoCorrect = new ImageIcon(
 			"resources/ico_correct.png");
 	public static final ImageIcon icoCorrectHover = new ImageIcon(
@@ -157,8 +157,8 @@ public class ListItem extends JPanel {
 	public static void setClassificationName(View.ClassificationName name) {
 		switch (name) {
 		case MAIL:
-			icoC1 = new ImageIcon("resources/spam.png");
-			icoC2 = new ImageIcon("resources/ham.png");
+			icoC1 = new ImageIcon("resources/ham.png");
+			icoC2 = new ImageIcon("resources/spam.png");
 			break;
 		case GENDER:
 			icoC1 = new ImageIcon("resources/male.png");
