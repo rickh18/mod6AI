@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * Contains some methods for some performance testing and arff data file generation.
  * Created by Student on 26-11-2014.
  */
 public class Simple {

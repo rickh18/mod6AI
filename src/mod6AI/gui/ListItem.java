@@ -90,7 +90,7 @@ public class ListItem extends JPanel {
 	/**
 	 * Returns the <code>String</code> text of the ListItem.
 	 * 
-	 * @return
+	 * @return the text of this ListItem displays.
 	 */
 	public String getText() {
 		return text;
@@ -99,7 +99,7 @@ public class ListItem extends JPanel {
 	/**
 	 * Change the <code>String</code> text of this ListItem.
 	 * 
-	 * @param text
+	 * @param text the text to display.
 	 */
 	public void setText(String text) {
 		this.text = text;
