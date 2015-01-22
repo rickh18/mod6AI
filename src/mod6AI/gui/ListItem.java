@@ -10,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 
 import mod6AI.ai.ClassificationType;
 import mod6AI.gui.View.MouseController;
@@ -21,24 +22,19 @@ import mod6AI.gui.View.MouseController;
  *
  */
 public class ListItem extends JPanel {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2413060721925199749L;
+
 	private ImageIcon icoPrediction;
 	private ClassificationType type;
-	private String text;
-
-	private JLabel lblText;
+	private final String text;
 	private JLabel lblPrediction;
 	private JLabel btnCorrect;
 	private JLabel btnWrong;
 	private JLabel btnCorrected;
-	private GridBagConstraints d = new GridBagConstraints();
+	private final GridBagConstraints d = new GridBagConstraints();
 
 	// Loading all images
-	public static ImageIcon icoC1;
-	public static ImageIcon icoC2;
+	private static ImageIcon icoC1;
+	private static ImageIcon icoC2;
 	public static final ImageIcon icoCorrect = new ImageIcon(
 			"resources/ico_correct.png");
 	public static final ImageIcon icoCorrectHover = new ImageIcon(
@@ -47,7 +43,7 @@ public class ListItem extends JPanel {
 			"resources/ico_wrong.png");
 	public static final ImageIcon icoWrongHover = new ImageIcon(
 			"resources/ico_wrong_hover.png");
-	public static final ImageIcon icoCorrected = new ImageIcon(
+	private static final ImageIcon icoCorrected = new ImageIcon(
 			"resources/ico_corrected.png");
 
 	/**
@@ -64,7 +60,6 @@ public class ListItem extends JPanel {
 	 */
 	public ListItem(String text, ClassificationType type,
 			MouseController controller) {
-		setClassificationType(type);
 		this.text = text;
 
 		this.setLayout(new GridBagLayout());
@@ -76,15 +71,8 @@ public class ListItem extends JPanel {
 		// item parameters
 		this.setPreferredSize(new Dimension(600, 60));
 		this.setMaximumSize(new Dimension(600, 60));
-	}
 
-	/**
-	 * Gets this ListItem.
-	 * 
-	 * @return <code>this</code>
-	 */
-	public ListItem getListItem() {
-		return this;
+		setClassificationType(type);
 	}
 
 	/**
@@ -96,39 +84,27 @@ public class ListItem extends JPanel {
 		return text;
 	}
 
-	/**
-	 * Change the <code>String</code> text of this ListItem.
-	 * 
-	 * @param text the text to display.
-	 */
-	public void setText(String text) {
-		this.text = text;
+	public void classify(boolean correct) {
+		if (!correct) {
+			if (type.equals(ClassificationType.C1))
+				setClassificationType(ClassificationType.C2);
+			else
+				setClassificationType(ClassificationType.C1);
+		}
+
+		this.remove(btnCorrect);
+		this.remove(btnWrong);
+		d.weightx = 2;
+		d.gridx = 2;
+		this.add(btnCorrected, d);
 	}
 
 	/**
-	 * Get the <code>ClassifcationType</code> this ListItem. Returns the inverse
-	 * if <code>boolean</code> correct = false;
+	 * Get the <code>ClassifcationType</code> this ListItem.
 	 * 
-	 * @param correct
-	 *            <code>boolean</code> correct true if this
-	 *            <code>ClassificationType</code> is needed, false is the
-	 *            inverse is needed.
 	 * @return <code>ClassificationType</code> type of this ListItem.
 	 */
-	public ClassificationType getClassificationType(boolean correct) {
-		if (!correct) {
-			switch (type) {
-			case C2:
-				setClassificationType(ClassificationType.C1);
-				break;
-			case C1:
-				setClassificationType(ClassificationType.C2);
-				break;
-			default:
-				return null;
-			}
-			lblPrediction.setIcon(icoPrediction);
-		}
+	public ClassificationType getClassificationType() {
 		return type;
 	}
 
@@ -139,12 +115,13 @@ public class ListItem extends JPanel {
 	 * @param type
 	 *            the <code>ClassificationType</code> type that has to be set.
 	 */
-	public void setClassificationType(ClassificationType type) {
+	void setClassificationType(ClassificationType type) {
 		this.type = type;
 		if (type.equals(ClassificationType.C1))
 			icoPrediction = icoC1;
 		else
 			icoPrediction = icoC2;
+		lblPrediction.setIcon(icoPrediction);
 	}
 
 	/**
@@ -154,30 +131,9 @@ public class ListItem extends JPanel {
 	 * @param name
 	 *            the <code>View.ClassificationName</code> name to be set.
 	 */
-	public static void setClassificationName(View.ClassificationName name) {
-		switch (name) {
-		case MAIL:
-			icoC1 = new ImageIcon("resources/ham.png");
-			icoC2 = new ImageIcon("resources/spam.png");
-			break;
-		case GENDER:
-			icoC1 = new ImageIcon("resources/male.png");
-			icoC2 = new ImageIcon("resources/female.png");
-			break;
-		default:
-			break;
-		}
-	}
-
-	/**
-	 * Change the buttons to corrected.
-	 */
-	public void changeButton() {
-		this.remove(btnCorrect);
-		this.remove(btnWrong);
-		d.weightx = 2;
-		d.gridx = 2;
-		this.add(btnCorrected, d);
+	public static void setClassificationName(ClassificationName name) {
+		icoC1 = new ImageIcon(name.getRes1());
+		icoC2 = new ImageIcon(name.getRes2());
 	}
 
 	/**
@@ -197,14 +153,16 @@ public class ListItem extends JPanel {
 	 * Adds the <code>JTextfield</code> and <code>JButtons</code> to this.
 	 */
 	private void drawLayout() {
+		Border border = BorderFactory.createLineBorder(Color.BLACK);
+
 		// GridBagConstraints
 		d.anchor = GridBagConstraints.NORTH;
 		d.fill = GridBagConstraints.HORIZONTAL;
 
 		// text
 		d.weightx = 8;
-		lblText = new JLabel(text);
-		lblText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		JLabel lblText = new JLabel(text);
+		lblText.setBorder(border);
 		lblText.setVerticalAlignment(JLabel.TOP);
 		lblText.setFont(new Font("Serif", Font.PLAIN, 20));
 		lblText.setMinimumSize(new Dimension(540, 60));
@@ -217,7 +175,7 @@ public class ListItem extends JPanel {
 		lblPrediction = new JLabel();
 		lblPrediction.setIcon(icoPrediction);
 		lblPrediction.setHorizontalAlignment(JLabel.CENTER);
-		lblPrediction.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		lblPrediction.setBorder(border);
 		lblPrediction.setMinimumSize(new Dimension(60, 60));
 		lblPrediction.setPreferredSize(new Dimension(60, 60));
 		this.add(lblPrediction, d);
@@ -227,7 +185,7 @@ public class ListItem extends JPanel {
 		btnCorrect = new JLabel();
 		btnCorrect.setIcon(icoCorrect);
 		btnCorrect.setHorizontalAlignment(JLabel.CENTER);
-		btnCorrect.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		btnCorrect.setBorder(border);
 		btnCorrect.setMinimumSize(new Dimension(60, 60));
 		btnCorrect.setPreferredSize(new Dimension(60, 60));
 		this.add(btnCorrect, d);
@@ -237,7 +195,7 @@ public class ListItem extends JPanel {
 		btnWrong = new JLabel();
 		btnWrong.setIcon(icoWrong);
 		btnWrong.setHorizontalAlignment(JLabel.CENTER);
-		btnWrong.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		btnWrong.setBorder(border);
 		btnWrong.setMinimumSize(new Dimension(60, 60));
 		btnWrong.setPreferredSize(new Dimension(60, 60));
 		this.add(btnWrong, d);
@@ -246,7 +204,7 @@ public class ListItem extends JPanel {
 		btnCorrected = new JLabel();
 		btnCorrected.setIcon(icoCorrected);
 		btnCorrected.setHorizontalAlignment(JLabel.CENTER);
-		btnCorrected.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		btnCorrected.setBorder(border);
 		btnCorrected.setMinimumSize(new Dimension(120, 60));
 		btnCorrected.setPreferredSize(new Dimension(120, 60));
 	}

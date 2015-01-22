@@ -387,7 +387,7 @@ public class AI {
      * @throws FileNotFoundException when the specified file was not found.
      */
     @SuppressWarnings("unchecked")
-    public synchronized boolean load(String file) throws FileNotFoundException {
+    public synchronized boolean load(String file) {
         try(ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             Object object = in.readObject();
             vocabulary = (HashMap<String, OccurrencesPerType>) object;

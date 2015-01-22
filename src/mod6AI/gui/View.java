@@ -16,8 +16,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Observable;
-import java.util.Observer;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -36,10 +34,10 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import mod6AI.ai.AI;
-import mod6AI.ai.ClassificationType;
 
 import com.sun.glass.events.KeyEvent;
 
@@ -49,36 +47,24 @@ import com.sun.glass.events.KeyEvent;
  * @author Rick Harms
  *
  */
-public class View extends JFrame implements Observer {
+class View extends JFrame {
 
-	private static final long serialVersionUID = -1229676347999028520L;
-	private String title = "Classifier group 3A";
-	private JPanel list;
-	private JButton button;
-	private JMenuBar menuBar;
-	private JMenu menu;
-	private JMenuItem info;
-	private JMenuItem[] menuItems = new JMenuItem[4];
-	private String[] menuItemNames = { "new", "Open", "Save", "Exit" };
-	private String[] options = { "Gender classifier", "Mail classifier",
-			"Open file" };
+	private final JPanel list;
+	private final JButton button;
+	private final JMenuItem info;
+	private final JMenuItem[] menuItems = new JMenuItem[4];
+
 	private JFileChooser fc;
-	private FileNameExtensionFilter gender;
-	private FileNameExtensionFilter mail;
-	private JStatusBar statusBar;
-	private JTextField input;
-	private JScrollBar vertical;
-	private MouseController controller;
+	private final JStatusBar statusBar;
+	private final JTextField input;
+	private final JScrollBar vertical;
+	private final MouseController controller;
 
-	ImageIcon icon;
-
-	private AI ai;
-
-	public enum ClassificationName {
-		GENDER, MAIL
-	}
-
-	private String extension;
+	private final AI ai;
+	private ClassificationName cn;
+	private FileFilter ffAll;
+	private FileFilter ffGender;
+	private FileFilter ffMail;
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> new View(new AI(1)));
@@ -90,7 +76,7 @@ public class View extends JFrame implements Observer {
 	 * @param ai
 	 *            The <code>AI</code> ai to start with.
 	 */
-	public View(AI ai) {
+	private View(AI ai) {
 		super();
 		this.ai = ai;
 		// Nice blue color for background
@@ -110,7 +96,6 @@ public class View extends JFrame implements Observer {
 		// List of items
 		list = new JPanel();
 		list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
-		list.setAlignmentY(LEFT_ALIGNMENT);
 		list.setBackground(bgColor);
 
 		// Scrollable field;
@@ -145,12 +130,13 @@ public class View extends JFrame implements Observer {
 		this.getContentPane().add(statusBar, BorderLayout.SOUTH);
 
 		// Menubar
-		menuBar = new JMenuBar();
-		this.setJMenuBar(menuBar);
+		JMenuBar menuBar = new JMenuBar();
+		
 
 		// First menu
-		menu = new JMenu("File");
+		JMenu menu = new JMenu("File");
 		menu.setMnemonic(KeyEvent.VK_F);
+		String[] menuItemNames = { "new", "Open", "Save", "Exit" };
 		menuItems[0] = new JMenuItem("New Classifier", KeyEvent.VK_N);
 		menuItems[1] = new JMenuItem("Open File...", KeyEvent.VK_O);
 		menuItems[2] = new JMenuItem("Save As...", KeyEvent.VK_S);
@@ -163,9 +149,11 @@ public class View extends JFrame implements Observer {
 		menuBar.add(menu);
 
 		// Info menu
-		info = new JMenuItem("?");
+		info = new JMenuItem(" test? ");
 		menuBar.add(info);
-
+		info.setMaximumSize(info.getPreferredSize());
+		
+		this.setJMenuBar(menuBar);
 		// Add controllers
 		new GuiController(ai);
 		controller = new MouseController();
@@ -174,7 +162,7 @@ public class View extends JFrame implements Observer {
 		setIcon(ClassificationName.GENDER);
 
 		// Frame parameters
-		this.setTitle(title);
+		this.setTitle("Classifier group 3A");
 		this.setSize(665, 720);
 		this.setResizable(false);
 		this.setVisible(true);
@@ -188,26 +176,27 @@ public class View extends JFrame implements Observer {
 		});
 	}
 
+	/**
+	 * Creates an new file chooser to open or safe files. adds file filters to
+	 * it.
+	 */
 	private void createFileChooser() {
 		fc = new JFileChooser();
-		gender = new FileNameExtensionFilter("Gender files (*.gender)",
+		ffAll = new FileNameExtensionFilter("Classifier files", "mail",
 				"gender");
-		mail = new FileNameExtensionFilter("Mail files (*.mail)", "mail");
-		fc.addChoosableFileFilter(gender);
-		fc.addChoosableFileFilter(mail);
-		fc.setFileFilter(gender);
-		fc.setFileFilter(mail);
-	}
-
-	@Override
-	public void update(Observable o, Object arg) {
-
+		ffGender = new FileNameExtensionFilter("Gender files (*.gender)",
+				"gender");
+		ffMail = new FileNameExtensionFilter("Mail files (*.mail)", "mail");
+		fc.addChoosableFileFilter(ffAll);
+		fc.addChoosableFileFilter(ffGender);
+		fc.addChoosableFileFilter(ffMail);
+		fc.setFileFilter(ffAll);
 	}
 
 	/**
 	 * Updating the window, repaint the contentPane
 	 */
-	public void update() {
+	void update() {
 		// Repainting
 		this.getContentPane().validate();
 		this.getContentPane().repaint();
@@ -224,7 +213,7 @@ public class View extends JFrame implements Observer {
 		/*
 		 * The <code>AI<code> ai that should be controlled.
 		 */
-		private AI ai;
+		private final AI ai;
 
 		/**
 		 * GuiController for the send button and the menu items.
@@ -244,6 +233,10 @@ public class View extends JFrame implements Observer {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			Object source = e.getSource();
+			String message = "Classifier. Made by Group 3A \n"
+					+ "Frans van dijk\n" + "Rick van Gemert\n"
+					+ "Remco Brunsveld and\n" + "Rick Harms";
+
 			if (source.equals(button) || source.equals(input)) {
 				list.add(new ListItem(input.getText(), ai.classify(input
 						.getText()), controller));
@@ -251,15 +244,11 @@ public class View extends JFrame implements Observer {
 				statusBar.setMessage("Item classified");
 				update();
 			} else if (source.getClass().equals(JMenuItem.class)) {
-				if (source.equals(info)) {
-					JOptionPane.showMessageDialog(View.this,
-							"Classifier. Made by Group 3A \n"
-									+ "Frans van dijk\n" + "Rick van Gemert\n"
-									+ "Remco Brunsveld and\n" + "Rick Harms",
-							"Info", JOptionPane.PLAIN_MESSAGE);
-				} else {
+				if (source.equals(info))
+					JOptionPane.showMessageDialog(View.this, message, "Info",
+							JOptionPane.PLAIN_MESSAGE);
+				else
 					menuAction((JMenuItem) source);
-				}
 			}
 		}
 	}
@@ -282,9 +271,8 @@ public class View extends JFrame implements Observer {
 				Icon icon = ((JLabel) source).getIcon();
 				if (parent.getClass().equals(ListItem.class)) {
 					item = (ListItem) parent;
-					item.changeButton();
-					ai.train(item.getText(), item.getClassificationType(icon
-							.equals(ListItem.icoCorrectHover)));
+					item.classify(icon.equals(ListItem.icoCorrectHover));
+					ai.train(item.getText(), item.getClassificationType());
 					statusBar.setMessage("Corrected");
 					update();
 				}
@@ -295,11 +283,10 @@ public class View extends JFrame implements Observer {
 		public void mouseEntered(MouseEvent e) {
 			if (e.getSource().getClass().equals(JLabel.class)) {
 				JLabel b = (JLabel) e.getSource();
-				if (b.getIcon().equals(ListItem.icoCorrect)) {
+				if (b.getIcon().equals(ListItem.icoCorrect))
 					b.setIcon(ListItem.icoCorrectHover);
-				} else if (b.getIcon().equals(ListItem.icoWrong)) {
+				else if (b.getIcon().equals(ListItem.icoWrong))
 					b.setIcon(ListItem.icoWrongHover);
-				}
 			}
 		}
 
@@ -307,11 +294,10 @@ public class View extends JFrame implements Observer {
 		public void mouseExited(MouseEvent e) {
 			if (e.getSource().getClass().equals(JLabel.class)) {
 				JLabel b = (JLabel) e.getSource();
-				if (b.getIcon().equals(ListItem.icoCorrectHover)) {
+				if (b.getIcon().equals(ListItem.icoCorrectHover))
 					b.setIcon(ListItem.icoCorrect);
-				} else if (b.getIcon().equals(ListItem.icoWrongHover)) {
+				else if (b.getIcon().equals(ListItem.icoWrongHover))
 					b.setIcon(ListItem.icoWrong);
-				}
 			}
 		}
 
@@ -325,64 +311,24 @@ public class View extends JFrame implements Observer {
 	}
 
 	/**
-	 * menuAction class. Handles all menu actrions from te different menu Items.
+	 * menuAction class. Handles all menu actions from the different menu Items.
 	 * 
 	 * @param source
 	 *            <code>JMenuItem</code> that called the action.
 	 */
 	private void menuAction(JMenuItem source) {
-		int returnVal;
-		File file;
 		switch (source.getName()) {
 		case "new":
 			new View(new AI(ai.getK()));
 			break;
 		case "Open":
-			if (fc == null) createFileChooser();
-			returnVal = fc.showOpenDialog(View.this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				file = fc.getSelectedFile();
-				try {
-					if (ai.load(file.getAbsolutePath())) {
-						list.removeAll();
-						update();
-						statusBar.setMessage("File: " + file.getName()
-								+ " opened.");
-						if (file.getAbsolutePath().endsWith(".mail")) {
-							setIcon(ClassificationName.MAIL);
-						} else {
-							setIcon(ClassificationName.GENDER);
-						}
-					} else {
-						throw new FileNotFoundException();
-					}
-				} catch (FileNotFoundException e1) {
-					showWarning("Opening file error", "File: " + file.getName()
-							+ " could not be opened.");
-				}
-			}
+			openFile();
 			break;
 		case "Save":
-			if (fc == null) createFileChooser();
-			returnVal = fc.showSaveDialog(View.this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				file = fc.getSelectedFile();
-				if (!file.getAbsolutePath().endsWith(extension)) {
-					file = new File(file.toString() + extension);
-				}
-				try {
-					ai.save(file.getAbsolutePath());
-					statusBar.setMessage("File saved as: " + file.getName()
-							+ ".");
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
+			safeFile();
 			break;
 		case "Exit":
 			View.this.dispose();
-			break;
-		default:
 			break;
 		}
 	}
@@ -393,7 +339,7 @@ public class View extends JFrame implements Observer {
 	 * @param title
 	 *            The <code>String</code> title of the dialog.
 	 * @param warning
-	 *            The <code>String</code> warning message to be desplayed.
+	 *            The <code>String</code> warning message to be displayed.
 	 */
 	private void showWarning(String title, String warning) {
 		statusBar.setMessage(warning);
@@ -406,47 +352,66 @@ public class View extends JFrame implements Observer {
 	 * at the start of the View.
 	 */
 	private void showOptions() {
+		String[] options = { "Gender classifier", "Mail classifier",
+				"Open file" };
 		int n = JOptionPane.showOptionDialog(View.this,
 				"What would you like to do?", "Choose option",
 				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
 				null, options, options[2]);
 		switch (n) {
 		case JOptionPane.YES_OPTION:
-			ClassificationType.C1.setName("Male");
-			ClassificationType.C2.setName("Female");
 			setIcon(ClassificationName.GENDER);
 			break;
 		case JOptionPane.NO_OPTION:
-			ClassificationType.C1.setName("Ham");
-			ClassificationType.C2.setName("Spam");
 			setIcon(ClassificationName.MAIL);
 			break;
 		case JOptionPane.CANCEL_OPTION:
-			File file;
-			if (fc == null) createFileChooser();
-			int returnVal = fc.showOpenDialog(View.this);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				file = fc.getSelectedFile();
-				try {
-					if (ai.load(file.getAbsolutePath())) {
-						statusBar.setMessage("File: " + file.getName()
-								+ " opened.");
-						if (file.getAbsolutePath().endsWith(".mail")) {
-							setIcon(ClassificationName.MAIL);
-						} else {
-							setIcon(ClassificationName.GENDER);
-						}
-					} else {
-						throw new FileNotFoundException();
-					}
-				} catch (FileNotFoundException e1) {
-					showWarning("Opening file error", "File: " + file.getName()
-							+ " could not be opened.");
+			openFile();
+			break;
+		}
+	}
+
+	private void openFile() {
+		if (fc == null)
+			createFileChooser();
+		fc.setFileFilter(ffAll);
+		if (fc.showOpenDialog(View.this) == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			try {
+				if (ai.load(file.getAbsolutePath())) {
+					statusBar.setMessage("File: " + file.getName() + " opened.");
+					if (file.getAbsolutePath().endsWith(".mail"))
+						setIcon(ClassificationName.MAIL);
+					else
+						setIcon(ClassificationName.GENDER);
+				} else {
+					throw new FileNotFoundException();
 				}
+			} catch (FileNotFoundException e1) {
+				showWarning("Opening file error", "File: " + file.getName()
+						+ " could not be opened.");
 			}
-			break;
-		default:
-			break;
+		}
+	}
+
+	private void safeFile() {
+		if (fc == null)
+			createFileChooser();
+		if (cn.equals(ClassificationName.GENDER))
+			fc.setFileFilter(ffGender);
+		else
+			fc.setFileFilter(ffMail);
+		if (fc.showSaveDialog(View.this) == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			if (!file.getAbsolutePath().endsWith(cn.getExtension()))
+				file = new File(file.toString() + cn.getExtension());
+			try {
+				ai.save(file.getAbsolutePath());
+				statusBar.setMessage("File saved as: " + file.getName() + ".");
+			} catch (IOException e1) {
+				showWarning("Saving file error", "File: " + file.getName()
+						+ " could not be saved.");
+			}
 		}
 	}
 
@@ -458,29 +423,15 @@ public class View extends JFrame implements Observer {
 	 *            Classification.
 	 */
 	private void setIcon(ClassificationName name) {
-		String res1 = null;
-		String res2 = null;
-		switch (name) {
-		case MAIL:
-			res1 = "resources/ham.png";
-			res2 = "resources/spam.png";
-			extension = ".mail";
-			ai.setK(0.1); ai.setThreshold(0);
-			break;
-		case GENDER:
-			res1 = "resources/male.png";
-			res2 = "resources/female.png";
-			extension = ".gender";
-			ai.setK(5.0); ai.setThreshold(0);
-			break;
-		default:
-			break;
-		}
-		if (Math.random() >= 0.5)
-			this.icon = new ImageIcon(res1);
-		else
-			this.icon = new ImageIcon(res2);
 		ListItem.setClassificationName(name);
+		this.cn = name;
+		ai.setK(name.getK());
+		ai.setThreshold(0);
+		ImageIcon icon;
+		if (Math.random() >= 0.5)
+			icon = new ImageIcon(name.getRes1());
+		else
+			icon = new ImageIcon(name.getRes2());
 		this.setIconImage(icon.getImage());
 	}
 }

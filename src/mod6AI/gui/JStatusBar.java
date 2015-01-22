@@ -9,12 +9,7 @@ import javax.swing.JLabel;
  * @author Rick
  *
  */
-public class JStatusBar extends JLabel {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+class JStatusBar extends JLabel {
 
 	/** Creates a new instance of StatusBar */
 	public JStatusBar() {
