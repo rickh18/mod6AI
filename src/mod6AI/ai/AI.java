@@ -384,7 +384,6 @@ public class AI {
      * The k and threshold values of this AI remain unchanged.
      * @param file the filename/-path to load.
      * @return {@code true} if everything was successful; otherwise {@code false}.
-     * @throws FileNotFoundException when the specified file was not found.
      */
     @SuppressWarnings("unchecked")
     public synchronized boolean load(String file) {
